@@ -69,6 +69,7 @@ class Command(BaseCommand):
                 pipeline_args=self.pipeline_class.pipeline_args,
                 pipeline_config=self.pipeline_class.pipeline_config
             )
+        # If pipeline doesn't exist, exit immediately
         else:
             sys.stdout.write('Pipeline {name} does not exist in {home}\n'.format(
                 name=self.pipeline_name,

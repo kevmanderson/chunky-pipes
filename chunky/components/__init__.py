@@ -1,5 +1,9 @@
 import subprocess
 import time
+import json
+import sys
+
+EXIT_ERROR = 1
 
 
 class Software:
@@ -49,11 +53,33 @@ class Pipe(object):
 
 
 class BasePipeline(object):
+    pipeline_args = None
+    pipeline_config = None
+
+    def description(self):
+        return ''
+
     def add_pipeline_args(self, parser):
         return parser
 
-    def configure(self):
-        pass
+    def parse_config(self):
+        try:
+            with open(self.pipeline_args['config']) as config:
+                self.pipeline_config = json.loads(config.read())
+        except IOError:
+            sys.stdout.write('Fatal Error: Config file at {} does not exist.\n'.format(
+                self.pipeline_args['config']
+            ))
+            sys.stdout.write('A config file location can be specified with the --config option.\n')
+            sys.exit(EXIT_ERROR)
+        except ValueError:
+            sys.stdout.write('Fatal Error: Config file at {} is not in JSON format.\n'.format(
+                self.pipeline_args['config']
+            ))
+            sys.exit(EXIT_ERROR)
 
-    def run_pipeline(self, pipeline_args):
+    def configure(self):
+        return {}
+
+    def run_pipeline(self, pipeline_args, pipeline_config):
         pass

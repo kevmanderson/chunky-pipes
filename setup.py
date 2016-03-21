@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='Chunky',
@@ -7,7 +7,7 @@ setup(
     author='Dominic Fitzgerald',
     author_email='dominicfitzgerald11@gmail.com',
     url='https://github.com/djf604/chunky',
-    packages=['chunky'],
+    packages=find_packages(),
     entry_points={
         'console_scripts': ['chunky = chunky.util:execute_from_command_line']
     },

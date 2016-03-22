@@ -37,9 +37,18 @@ class Command(BaseCommand):
         return None
 
     def parse_options(self):
-        self.options_parser = argparse.ArgumentParser(prog='chunky run {}'.format(self.pipeline_name))
+        # Create argument parser
+        self.options_parser = argparse.ArgumentParser(prog='chunky run {}'.format(self.pipeline_name),
+                                                      description=self.pipeline_class.description())
+
+        # Add a config argument to every pipeline so user isn't locked into the installation home
+        self.options_parser.add_argument('-c', '--config',
+                                         default=os.path.join(self.home_configs, '{}.json'.format(self.pipeline_name)),
+                                         help='Path to a config file to use for this run.')
+
+        # Add pipeline specific arguments, parse arguments, and inject into pipeline class as dict
         self.pipeline_class.add_pipeline_args(self.options_parser)
-        self.options = self.options_parser.parse_args(self.argv[1:])
+        self.pipeline_class.pipeline_args = vars(self.options_parser.parse_args(self.argv[1:]))
 
     def run(self):
         # Check to see a minimum number of arguments
@@ -55,7 +64,12 @@ class Command(BaseCommand):
         # Parse arguments from argv
         if self.pipeline_class:
             self.parse_options()
-            self.pipeline_class.run_pipeline(self.options)
+            self.pipeline_class.parse_config()
+            self.pipeline_class.run_pipeline(
+                pipeline_args=self.pipeline_class.pipeline_args,
+                pipeline_config=self.pipeline_class.pipeline_config
+            )
+        # If pipeline doesn't exist, exit immediately
         else:
             sys.stdout.write('Pipeline {name} does not exist in {home}\n'.format(
                 name=self.pipeline_name,

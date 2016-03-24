@@ -17,6 +17,18 @@ def print_unrecognized_command(subcommand):
     print_help_text()
 
 
+def add_common_pipeline_args(parser):
+    parser.add_argument('--reads', required=True, action='append',
+                        help=('Raw reads to process with this pipeline. Paired-end reads ' +
+                              'can be joined together with a colon (:). Specify this option ' +
+                              'multiple times to process multiple raw reads files.\nEx ' +
+                              'paired-end: --reads read1.fastq:read2.fastq\nEx single-end: ' +
+                              '--reads sample1.fastq sample1.extra.fastq'))
+    parser.add_argument('--output', required=True,
+                        help='Directory to store all results of this pipeline in.')
+    parser.add_argument('--log')
+
+
 def execute_from_command_line(argv=None):
     argv = argv or sys.argv[:]
     try:

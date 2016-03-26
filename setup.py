@@ -1,3 +1,4 @@
+import sys
 import os
 from setuptools import setup, find_packages
 
@@ -26,11 +27,14 @@ setup(
 )
 
 user_home = os.path.expanduser('~')
-if not os.path.exists(os.path.join(user_home, '.chunky')):
-    os.mkdir(os.path.join(user_home, '.chunky'))
-if not os.path.exists(os.path.join(user_home, '.chunky', 'pipelines')):
-    os.mkdir(os.path.join(user_home, '.chunky', 'pipelines'))
-if not os.path.isfile(os.path.join(user_home, '.chunky', 'piplines', '__init__.py')):
-    os.mknod(os.path.join(user_home, '.chunky', 'pipelines', '__init__.py'), 0o644)
-if not os.path.exists(os.path.join(user_home, '.chunky', 'configs')):
-    os.mkdir(os.path.join(user_home, '.chunky', 'configs'))
+try:
+    if not os.path.exists(os.path.join(user_home, '.chunky')):
+        os.mkdir(os.path.join(user_home, '.chunky'))
+    if not os.path.exists(os.path.join(user_home, '.chunky', 'pipelines')):
+        os.mkdir(os.path.join(user_home, '.chunky', 'pipelines'))
+    if not os.path.isfile(os.path.join(user_home, '.chunky', 'pipelines', '__init__.py')):
+        os.mknod(os.path.join(user_home, '.chunky', 'pipelines', '__init__.py'), 0o644)
+    if not os.path.exists(os.path.join(user_home, '.chunky', 'configs')):
+        os.mkdir(os.path.join(user_home, '.chunky', 'configs'))
+except OSError as e:
+    sys.stderr.write('An error occured creating the Chunky hidden filesystem.\n{}\n'.format(e.message))

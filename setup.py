@@ -1,3 +1,4 @@
+import os
 from setuptools import setup, find_packages
 
 setup(
@@ -23,3 +24,12 @@ setup(
         'Topic :: Software Development :: Libraries'
     ]
 )
+
+user_home = os.path.expanduser('~')
+if not os.path.exists(os.path.join(user_home, '.chunky')):
+    os.mkdir(os.path.join(user_home, '.chunky'))
+if not os.path.exists(os.path.join(user_home, '.chunky', 'pipelines')):
+    os.mkdir(os.path.join(user_home, '.chunky', 'pipelines'))
+os.mknod(os.path.join(user_home, '.chunky', 'pipelines', '__init__.py'), mode=0o644)
+if not os.path.exists(os.path.join(user_home, '.chunky', 'configs')):
+    os.mkdir(os.path.join(user_home, '.chunky', 'configs'))

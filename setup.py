@@ -37,4 +37,4 @@ try:
     if not os.path.exists(os.path.join(user_home, '.chunky', 'configs')):
         os.mkdir(os.path.join(user_home, '.chunky', 'configs'))
 except OSError as e:
-    sys.stderr.write('An error occured creating the Chunky hidden filesystem.\n{}\n'.format(e.message))
+    sys.stderr.write('An error occurred creating the Chunky hidden filesystem.\n{}\n'.format(e.message))

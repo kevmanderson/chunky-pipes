@@ -4,9 +4,11 @@ import os
 class BaseCommand(object):
     argv = None
     options = {}
-    user_home = os.path.expanduser('~')
-    home_pipelines = os.path.join(user_home, '.chunky', 'pipelines')
-    home_configs = os.path.join(user_home, '.chunky', 'configs')
+    chunky_home = (os.path.expanduser('~')
+                   if 'CHUNKY_HOME' not in os.environ
+                   else os.environ['CHUNKY_HOME'])
+    home_pipelines = os.path.join(chunky_home, '.chunky', 'pipelines')
+    home_configs = os.path.join(chunky_home, '.chunky', 'configs')
 
     def run(self):
         pass

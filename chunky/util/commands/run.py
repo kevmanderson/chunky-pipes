@@ -64,7 +64,7 @@ class Command(BaseCommand):
         # Parse arguments from argv
         if self.pipeline_class:
             self.parse_options()
-            self.pipeline_class.parse_config()
+            self.pipeline_class._parse_config()
             self.pipeline_class.run_pipeline(
                 pipeline_args=self.pipeline_class.pipeline_args,
                 pipeline_config=self.pipeline_class.pipeline_config

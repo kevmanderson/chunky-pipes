@@ -1,6 +1,6 @@
 import os
 import sys
-from chunky.util.base import BaseCommand
+from chunkypipes.util.base import BaseCommand
 
 ARGV_CHUNKY_HOME_ROOT = 0
 

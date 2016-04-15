@@ -3,15 +3,15 @@ import os
 from setuptools import setup, find_packages
 
 setup(
-    name='Chunky',
+    name='ChunkyPipes',
     version='0.2.0',
     description='Pipeline design and distribution framework',
     author='Dominic Fitzgerald',
     author_email='dominicfitzgerald11@gmail.com',
-    url='https://github.com/djf604/chunky',
+    url='https://github.com/djf604/chunky-pipes',
     packages=find_packages(),
     entry_points={
-        'console_scripts': ['chunky = chunky.util:execute_from_command_line']
+        'console_scripts': ['chunky = chunkypipes.util:execute_from_command_line']
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -37,4 +37,4 @@ try:
     if not os.path.exists(os.path.join(user_home, '.chunky', 'configs')):
         os.mkdir(os.path.join(user_home, '.chunky', 'configs'))
 except OSError as e:
-    sys.stderr.write('An error occurred creating the Chunky hidden filesystem.\n{}\n'.format(e.message))
+    sys.stderr.write('An error occurred creating the ChunkyPipes hidden filesystem.\n{}\n'.format(e.message))

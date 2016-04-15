@@ -3,7 +3,7 @@ from importlib import import_module
 
 
 def fetch_command_class(subcommand):
-    module = import_module('chunky.util.commands.{}'.format(subcommand))
+    module = import_module('chunkypipes.util.commands.{}'.format(subcommand))
     return module.Command()
 
 

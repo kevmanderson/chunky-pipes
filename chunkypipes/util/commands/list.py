@@ -1,6 +1,7 @@
 import os
 import sys
-from chunky.util.base import BaseCommand
+from chunkypipes.util.base import BaseCommand
+
 
 class Command(BaseCommand):
 

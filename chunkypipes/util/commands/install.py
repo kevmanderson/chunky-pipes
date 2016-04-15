@@ -1,7 +1,7 @@
 import sys
 import os
 import shutil
-from chunky.util.base import BaseCommand
+from chunkypipes.util.base import BaseCommand
 
 ARGV_PIPELINE_NAME = 0
 EXIT = 0
@@ -51,6 +51,3 @@ class Command(BaseCommand):
         except (IOError, OSError, shutil.Error):
             sys.stdout.write('Pipeline {} not found\n'.format(pipeline_name))
             sys.exit(EXIT)
-
-
-

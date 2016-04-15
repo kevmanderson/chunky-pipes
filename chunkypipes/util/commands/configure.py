@@ -3,7 +3,7 @@ import os
 import imp
 import argparse
 import json
-from chunky.util.base import BaseCommand
+from chunkypipes.util.base import BaseCommand
 
 ARGV_PIPELINE_NAME = 0
 EXIT_CMD_SYNTAX_ERROR = 2

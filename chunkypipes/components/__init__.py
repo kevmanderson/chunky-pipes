@@ -234,8 +234,12 @@ class Pipe(object):
     meant to be the result of the Software.pipe() method.
     """
     def __init__(self, piped_software_dict):
-        self.piped_software = piped_software_dict['software']
-        self.piped_args = piped_software_dict['args']
+        try:
+            self.piped_software = piped_software_dict['software']
+            self.piped_args = piped_software_dict['args']
+        except TypeError as e:
+            sys.stderr.write('Software was not piped together correctly\n')
+            sys.stderr.write(e.message)
 
     def __str__(self):
         return '| ' + self.piped_software.cmd(*self.piped_args)

@@ -85,7 +85,7 @@ class Command(BaseCommand):
 
             # Write config out to file
             with open(save_location, 'w') as config_output:
-                config_output.write(json.dumps(config_dict) + '\n')
+                config_output.write(json.dumps(config_dict, indent=4) + '\n')
         # If pipeline doesn't exist, exit immediately
         else:
             sys.stdout.write('Pipeline {name} does not exist in {home}\n'.format(

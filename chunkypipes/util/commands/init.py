@@ -18,9 +18,12 @@ class Command(BaseCommand):
             if not os.path.exists(os.path.join(chunky_home_root, '.chunky', 'configs')):
                 os.mkdir(os.path.join(chunky_home_root, '.chunky', 'configs'))
 
-            sys.stdout.write('Please set a CHUNKY_HOME environment variable to {}\n'.format(chunky_home_root))
+            sys.stdout.write('ChunkyPipes successfully initialized at {}\n'.format(chunky_home_root))
+
+            if chunky_home_root != os.path.expanduser('~'):
+                sys.stdout.write('Please set a CHUNKY_HOME environment variable to {}\n'.format(chunky_home_root))
         except OSError as e:
-            sys.stderr.write('An error occurred creating the Chunky hidden filesystem at {}.\n{}\n'.format(
+            sys.stderr.write('An error occurred initializing ChunkyPipes at {}.\n{}\n'.format(
                 chunky_home_root,
                 e.message
             ))
@@ -29,9 +32,9 @@ class Command(BaseCommand):
         return 'Usage: chunky init [chunky_home_root]'
 
     def help_text(self):
-        help_msg = ('Create a chunky hidden filesystem stucture at the given location.\n\n' +
+        help_msg = ('Initializes ChunkyPipes at the given location.\n\n' +
                     'If no path is given, the current working directory is used.\nThe user ' +
-                    'needs to set the CHUNKY_HOME environment variable manually for\nchunky ' +
+                    'needs to set the CHUNKY_HOME environment variable manually for\nChunkyPipes ' +
                     'to use the newly created directory.')
         return '\n'.join([self.usage(), help_msg])
 

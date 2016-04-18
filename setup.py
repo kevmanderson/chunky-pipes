@@ -25,16 +25,3 @@ setup(
         'Topic :: Software Development :: Libraries'
     ]
 )
-
-user_home = os.path.expanduser('~')
-try:
-    if not os.path.exists(os.path.join(user_home, '.chunky')):
-        os.mkdir(os.path.join(user_home, '.chunky'))
-    if not os.path.exists(os.path.join(user_home, '.chunky', 'pipelines')):
-        os.mkdir(os.path.join(user_home, '.chunky', 'pipelines'))
-    if not os.path.isfile(os.path.join(user_home, '.chunky', 'pipelines', '__init__.py')):
-        os.mknod(os.path.join(user_home, '.chunky', 'pipelines', '__init__.py'), 0o644)
-    if not os.path.exists(os.path.join(user_home, '.chunky', 'configs')):
-        os.mkdir(os.path.join(user_home, '.chunky', 'configs'))
-except OSError as e:
-    sys.stderr.write('An error occurred creating the ChunkyPipes hidden filesystem.\n{}\n'.format(e.message))

@@ -1,4 +1,5 @@
 import sys
+import traceback
 from importlib import import_module
 
 
@@ -54,3 +55,4 @@ def execute_from_command_line(argv=None):
     except Exception as e:
         sys.stderr.write('ChunkyPipes encountered an error when trying to execute {}:\n'.format(subcommand))
         sys.stderr.write(e.message + '\n')
+        traceback.print_exc()

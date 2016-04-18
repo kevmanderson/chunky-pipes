@@ -1,4 +1,5 @@
 import sys
+import os
 import traceback
 from importlib import import_module
 
@@ -6,6 +7,12 @@ from importlib import import_module
 def fetch_command_class(subcommand):
     module = import_module('chunkypipes.util.commands.{}'.format(subcommand))
     return module.Command()
+
+
+def print_no_init():
+    sys.stderr.write('ChunkyPipes cannot find an init directory at the user ' +
+                     'home or in the CHUNKY_HOME environment variable. Please ' +
+                     'run \'chunky init\' before using ChunkyPipes.\n')
 
 
 def print_help_text():
@@ -37,6 +44,11 @@ def execute_from_command_line(argv=None):
     except IndexError:
         print_help_text()
         sys.exit(0)
+
+    chunky_home_root = os.environ.get('CHUNKY_HOME') or os.path.expanduser('~')
+    if not os.path.exists(os.path.join(chunky_home_root, '.chunky')):
+        print_no_init()
+        sys.exit(1)
 
     send_argv = []
     if len(argv) > 2:

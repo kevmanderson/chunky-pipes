@@ -12,8 +12,8 @@ def print_help_text():
 
 
 def print_unrecognized_command(subcommand):
-    sys.stdout.write('Unrecognized command: {}\n\n'.format(subcommand))
-    sys.stdout.write('Use one of the following:\n')
+    sys.stderr.write('Unrecognized command: {}\n\n'.format(subcommand))
+    sys.stderr.write('Use one of the following:\n')
     print_help_text()
 
 
@@ -41,7 +41,16 @@ def execute_from_command_line(argv=None):
     if len(argv) > 2:
         send_argv = argv[2:]
 
+    # Get the class for this called command
+    command_class = None
     try:
-        fetch_command_class(subcommand).run_from_argv(send_argv)
+        command_class = fetch_command_class(subcommand)
     except ImportError:
         print_unrecognized_command(subcommand)
+
+    # Attempt to execute the command
+    try:
+        command_class.run_from_argv(send_argv)
+    except Exception as e:
+        sys.stderr.write('ChunkyPipes encountered an error when trying to run {}\n'.format(subcommand))
+        sys.stderr.write(e.message + '\n')

@@ -3,10 +3,14 @@ import os
 import imp
 import argparse
 import json
+import readline
 from chunkypipes.util.base import BaseCommand
 
 ARGV_PIPELINE_NAME = 0
 EXIT_CMD_SYNTAX_ERROR = 2
+
+readline.set_completer_delims(' \t\n;')
+readline.parse_and_bind('tab: complete')
 
 
 class Command(BaseCommand):

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ChunkyPipes',
-    version='0.2.0',
+    version='0.2.1',
     description='Pipeline design and distribution framework',
     author='Dominic Fitzgerald',
     author_email='dominicfitzgerald11@gmail.com',

@@ -6,6 +6,7 @@ setup(
     name='ChunkyPipes',
     version='0.2.1',
     description='Pipeline design and distribution framework',
+    license='MIT',
     author='Dominic Fitzgerald',
     author_email='dominicfitzgerald11@gmail.com',
     url='https://github.com/djf604/chunky-pipes',
@@ -23,6 +24,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
-        'Topic :: Software Development :: Libraries'
+        'Topic :: Software Development :: Libraries',
+        'License :: OSI Approved :: MIT License'
     ]
 )

@@ -9,6 +9,14 @@ ChunkyPipes
     :target: https://pypi.python.org/pypi/chunkypipes/
     :alt: Downloads
 
+.. image:: https://img.shields.io/pypi/l/chunkypipes.svg
+    :target: https://pypi.python.org/pypi/chunkypipes/
+    :alt: License
+
+.. image:: https://img.shields.io/pypi/status/chunkypipes.svg
+    :target: https://pypi.python.org/pypi/chunkypipes/
+    :alt: Status
+
 ChunkyPipes is a framework for easily designing and distributing NGS pipelines written in Python.
 
 Running a pipeline with ChunkyPipes can be as simple as::

@@ -9,10 +9,6 @@ ChunkyPipes
     :target: https://pypi.python.org/pypi/chunkypipes/
     :alt: Downloads
 
-.. image:: https://img.shields.io/pypi/l/chunkypipes.svg
-    :target: https://pypi.python.org/pypi/chunkypipes/
-    :alt: License
-
 .. image:: https://img.shields.io/pypi/status/chunkypipes.svg
     :target: https://pypi.python.org/pypi/chunkypipes/
     :alt: Status

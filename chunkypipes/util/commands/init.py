@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
     def run(self):
         if not self.argv:
-            chunky_home_root = os.path.abspath('.')
+            chunky_home_root = os.path.expanduser('~')
         else:
             chunky_home_root = os.path.abspath(self.argv[ARGV_CHUNKY_HOME_ROOT])
         self.make_chunky_home(chunky_home_root)

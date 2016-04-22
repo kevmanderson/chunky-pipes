@@ -21,3 +21,4 @@ Running a pipeline with ChunkyPipes can be as simple as::
     $ chunky configure easy-pipeline
     $ chunky run easy-pipeline [arguments]
 
+Read the full documentation `here<http://chunky-pipes.readthedocs.org/en/latest/>`_.

@@ -45,10 +45,10 @@ def execute_from_command_line(argv=None):
         print_help_text()
         sys.exit(0)
 
-    chunky_home_root = os.environ.get('CHUNKY_HOME') or os.path.expanduser('~')
-    if not os.path.exists(os.path.join(chunky_home_root, '.chunky')):
-        print_no_init()
-        sys.exit(1)
+    # chunky_home_root = os.environ.get('CHUNKY_HOME') or os.path.expanduser('~')
+    # if not os.path.exists(os.path.join(chunky_home_root, '.chunky')):
+    #     print_no_init()
+    #     sys.exit(1)
 
     send_argv = []
     if len(argv) > 2:

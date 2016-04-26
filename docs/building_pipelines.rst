@@ -6,7 +6,7 @@ subclasses ``chunkypipes.components.BasePipeline`` and overrides the following
 methods::
 
     # fun-pipeline.py
-    import chunkypipes.components.BasePipeline
+    from chunkypipes.components import BasePipeline
 
     class Pipeline(BasePipeline):
         def description(self):
@@ -147,7 +147,7 @@ Often the software path will come from a configuration value.
 
     from chunkypipes.components import Software
 
-    software1 = Software('software1', pipeline_config['software1']['path']
+    software1 = Software('software1', pipeline_config['software1']['path'])
 
 To run this software at any point in the pipeline, call the ``run()`` method and supply any number of Parameters, up
 to two Redirects, and up to one Pipe.

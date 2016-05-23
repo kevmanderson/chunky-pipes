@@ -4,9 +4,11 @@ import imp
 import argparse
 import json
 import readline
-from chunkypipes.util.base import BaseCommand
+from chunkypipes.util.commands import BaseCommand
 
 ARGV_PIPELINE_NAME = 0
+ARGV_FIRST_ARGUMENT = 0
+EXIT_CMD_SUCCESS = 0
 EXIT_CMD_SYNTAX_ERROR = 2
 
 readline.set_completer_delims(' \t\n;')
@@ -14,12 +16,9 @@ readline.parse_and_bind('tab: complete')
 
 
 class Command(BaseCommand):
-    def usage(self):
-        return 'Usage: chunky configure <pipeline> [configure_options]'
-
-    def help_text(self):
-        help_msg = 'Create a configuration file for a pipeline.'
-        return '\n'.join([self.usage(), help_msg])
+    @staticmethod
+    def usage():
+        return 'chunky configure <pipeline-name> [-h] [configure_options]'
 
     def get_pipeline_class(self, pipeline_name):
         pipeline_filepath = os.path.join(self.home_pipelines,
@@ -35,33 +34,43 @@ class Command(BaseCommand):
         # If none of the above, return None
         return None
 
-    def configure(self, config_dict):
+    def configure(self, config_dict, blank=False):
         for key in config_dict:
             if type(config_dict[key]) == dict:
-                self.configure(config_dict[key])
+                self.configure(config_dict[key], blank)
             else:
-                prompt = config_dict[key].strip().strip(':')
-                config_dict[key] = raw_input(prompt + ': ')
+                if not blank:
+                    prompt = config_dict[key].strip().strip(':')
+                    config_dict[key] = raw_input(prompt + ': ')
+                else:
+                    config_dict[key] = ''
 
-    def run(self):
-        # Check to see a minimum number of arguments
-        if not self.argv:
-            sys.stdout.write('No pipeline provided to configure.\n')
-            sys.stdout.write(self.usage() + '\n')
-            sys.exit(EXIT_CMD_SYNTAX_ERROR)
+    def help_text(self):
+        return 'Create a configuration file for a pipeline.'
 
-        # Get pipeline name from argv and pipeline class from name
-        pipeline_name = self.argv[ARGV_PIPELINE_NAME]
+    def run(self, command_args):
+        parser = argparse.ArgumentParser(prog='chunky configure', usage=self.usage(), description=self.help_text())
+        if not command_args or command_args[ARGV_FIRST_ARGUMENT].lower() in ['-h', '--help', 'help']:
+            parser.print_help()
+            sys.exit(EXIT_CMD_SUCCESS)
+
+        pipeline_name = command_args[ARGV_PIPELINE_NAME]
         pipeline_class = self.get_pipeline_class(pipeline_name)
 
-        # Parse agruments from argv
-        if pipeline_class:
-            parser = argparse.ArgumentParser(prog='chunky configure {}'.format(pipeline_name))
-            parser.add_argument('--location',
-                                default=os.path.join(self.home_configs,
-                                                     '{}.json'.format(pipeline_name)),
-                                help='Path to which to save this config file. Defaults to install directory.')
-            save_location = vars(parser.parse_args(self.argv[1:]))['location']
+        if pipeline_class is not None:
+            # Parse configure options
+            config_args_parser = argparse.ArgumentParser(prog='chunky configure {}'.format(pipeline_name))
+            config_args_parser.add_argument('--location',
+                                            default=os.path.join(self.home_configs,
+                                                                 '{}.json'.format(pipeline_name)),
+                                            help=('Path to which to save this config file. ' +
+                                                  'Defaults to install directory.'))
+            config_args_parser.add_argument('--blank', action='store_true',
+                                            help='Skip configuration and create a blank configuration file.')
+            configure_args = vars(config_args_parser.parse_args(command_args[1:]))
+
+            save_location = configure_args['location']
+            is_blank = configure_args['blank']
 
             # If this config already exists, prompt user before overwrite
             if os.path.isfile(save_location):
@@ -69,25 +78,32 @@ class Command(BaseCommand):
                     pipeline_name,
                     save_location
                 ))
-                no_set = {'no', 'n'}
 
                 # If user responds no, exit immediately
-                if overwrite.lower() in no_set:
-                    sys.exit(0)
+                if overwrite.lower() in {'no', 'n'}:
+                    sys.stderr.write('\nUser aborted configuration.\n')
+                    sys.exit(EXIT_CMD_SUCCESS)
 
             # Get configuration from pipeline, recursively prompt user to fill in info
             config_dict = pipeline_class.configure()
             try:
-                self.configure(config_dict)
+                self.configure(config_dict, is_blank)
+                if is_blank:
+                    sys.stderr.write('Blank configuration generated.\n')
             except (KeyboardInterrupt, EOFError):
-                sys.stdout.write('\nUser aborted configuration.\n')
-                sys.exit(0)
+                sys.stderr.write('\nUser aborted configuration.\n')
+                sys.exit(EXIT_CMD_SUCCESS)
 
             # Write config out to file
-            with open(save_location, 'w') as config_output:
-                config_output.write(json.dumps(config_dict, indent=4) + '\n')
-        # If pipeline doesn't exist, exit immediately
+            try:
+                with open(save_location, 'w') as config_output:
+                    config_output.write(json.dumps(config_dict, indent=4) + '\n')
+                sys.stderr.write('Configuration file successfully written.\n')
+            except IOError:
+                sys.stderr.write('Could not open file for writing.\n')
+                sys.exit(1)
         else:
+            # If pipeline class doesn't exist, exit immediately
             sys.stdout.write('Pipeline {name} does not exist in {home}\n'.format(
                 name=pipeline_name,
                 home=self.home_pipelines + '/'

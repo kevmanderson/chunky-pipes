@@ -1,6 +1,7 @@
 import os
 import sys
-from chunkypipes.util.base import BaseCommand
+import argparse
+from chunkypipes.util.commands import BaseCommand
 
 ARGV_CHUNKY_HOME_ROOT = 0
 
@@ -28,19 +29,24 @@ class Command(BaseCommand):
                 e.message
             ))
 
-    def usage(self):
-        return 'Usage: chunky init [chunky_home_root]'
+    @staticmethod
+    def usage():
+        return 'chunky init [chunky_home_root]'
 
     def help_text(self):
-        help_msg = ('Initializes ChunkyPipes at the given location.\n\n' +
-                    'If no path is given, the current working directory is used.\nThe user ' +
-                    'needs to set the CHUNKY_HOME environment variable manually for\nChunkyPipes ' +
-                    'to use the newly created directory.')
-        return '\n'.join([self.usage(), help_msg])
+        return ('Initializes ChunkyPipes at the given location.\n\n' +
+                'If no path is given, the user home directory is used.\n For any location other than ' +
+                'the user home directory, the user ' +
+                'needs to set a CHUNKY_HOME environment variable manually for\nChunkyPipes ' +
+                'to use the newly created directory.')
 
-    def run(self):
-        if not self.argv:
-            chunky_home_root = os.path.expanduser('~')
-        else:
-            chunky_home_root = os.path.abspath(self.argv[ARGV_CHUNKY_HOME_ROOT])
+    def run(self, command_args):
+        parser = argparse.ArgumentParser(prog='chunky init', usage=self.usage(), description=self.help_text())
+        parser.add_argument('chunky-home-root', default=os.path.expanduser('~'), nargs='?',
+                            help=('ChunkyPipes will initialize in this directory. ' +
+                                  'Defaults to the user home directory.'))
+        chunky_home_root = vars(parser.parse_args(command_args))['chunky-home-root']
+        if chunky_home_root.lower() == 'help':
+            parser.print_help()
+            sys.exit(0)
         self.make_chunky_home(chunky_home_root)

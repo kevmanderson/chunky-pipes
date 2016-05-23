@@ -1,26 +1,13 @@
-import os
-import sys
-import pkgutil
-from importlib import import_module
-from chunkypipes.util.base import BaseCommand
-import chunkypipes.util.commands
-
-FILENAME_WITHOUT_EXTENSION = 0
-ARGV_COMMAND_NAME = 0
+from chunkypipes.util.commands import BaseCommand
 
 
 class Command(BaseCommand):
-    command_name = os.path.splitext(os.path.basename(__file__))[FILENAME_WITHOUT_EXTENSION]
+    """
+    This class only exists so argparse will display help as
+    a subcommand.
+    """
+    def help_text(self):
+        return 'Show this help message and exit.'
 
-    def run(self):
-        chunky_commands = [name for _, name, _
-                           in pkgutil.iter_modules(chunkypipes.util.commands.__path__)
-                           if name != self.command_name]
-        if self.argv and self.argv[ARGV_COMMAND_NAME] in chunky_commands:
-            chunky_commands = [self.argv[ARGV_COMMAND_NAME]]
-
-        base_module = 'chunkypipes.util.commands.{}'
-        for command in chunky_commands:
-            sys.stdout.write(command + ':\n')
-            module = import_module(base_module.format(command)).Command()
-            sys.stdout.write(module.help_text() + '\n\n')
+    def run(self, command_args):
+        return

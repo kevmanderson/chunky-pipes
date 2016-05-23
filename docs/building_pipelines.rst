@@ -16,7 +16,7 @@ methods::
             return {}
 
         def add_pipeline_args(self, parser):
-            return parser
+            pass
 
         def run_pipeline(self, pipeline_args, pipeline_config):
             pass
@@ -92,7 +92,6 @@ The ``argparse`` module does not need to be imported by the pipeline.
         parser.add_argument('--read', required=True, help='Path to the read fastq')
         parser.add_argument('--output', required=True, help='Path to output directory')
         parser.add_argument('--lib', default='default_lib', help='Name of the library')
-        return parser
 
 These arguments will be exposed to the user according to the rules of the ``argparse`` module::
 

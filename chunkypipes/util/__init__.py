@@ -1,7 +1,11 @@
 import sys
 import os
 import traceback
+import argparse
 from importlib import import_module
+
+import pkgutil
+import chunkypipes.util.commands
 
 
 def fetch_command_class(subcommand):
@@ -39,32 +43,36 @@ def add_common_pipeline_args(parser):
 
 def execute_from_command_line(argv=None):
     argv = argv or sys.argv[:]
-    try:
-        subcommand = argv[1]
-    except IndexError:
-        print_help_text()
-        sys.exit(0)
 
-    # chunky_home_root = os.environ.get('CHUNKY_HOME') or os.path.expanduser('~')
-    # if not os.path.exists(os.path.join(chunky_home_root, '.chunky')):
-    #     print_no_init()
-    #     sys.exit(1)
+    # Get command classes
+    chunky_command_classes = {chunky_command: fetch_command_class(chunky_command)
+                              for chunky_command in [
+                                  name for _, name, _
+                                  in pkgutil.iter_modules(chunkypipes.util.commands.__path__)
+                                  ]
+                              }
 
-    send_argv = []
-    if len(argv) > 2:
-        send_argv = argv[2:]
+    # Create subparsers
+    parser = argparse.ArgumentParser(prog='chunky')
+    subparsers = parser.add_subparsers(dest='subcommand',
+                                       metavar='[{}]'.format(', '.join(chunky_command_classes.keys())))
 
-    # Get the class for this called command
-    command_class = None
-    try:
-        command_class = fetch_command_class(subcommand)
-    except ImportError:
-        print_unrecognized_command(subcommand)
+    # Add a subparser for each subcommand
+    for chunky_command, chunky_command_class in chunky_command_classes.iteritems():
+        subparsers.add_parser(chunky_command, help=chunky_command_class.help_text())
 
-    # Attempt to execute the command
-    try:
-        command_class.run_from_argv(send_argv)
-    except Exception as e:
-        sys.stderr.write('ChunkyPipes encountered an error when trying to execute {}:\n'.format(subcommand))
-        sys.stderr.write(e.message + '\n')
-        traceback.print_exc()
+    if len(sys.argv) == 1:
+        # If no arguments were given, print help
+        parser.print_help()
+    else:
+        # Otherwise, run subcommand Command class, passing in all arguments after subcommand
+        subcommand = vars(parser.parse_args(argv[1:2])).get('subcommand', 'help')
+        if subcommand.lower() == 'help':
+            parser.print_help()
+            sys.exit(0)
+        try:
+            chunky_command_classes[subcommand].run(argv[2:])
+        except Exception as e:
+            sys.stderr.write('ChunkyPipes encountered an error when trying to execute {}:\n'.format(subcommand))
+            sys.stderr.write(e.message + '\n')
+            traceback.print_exc()

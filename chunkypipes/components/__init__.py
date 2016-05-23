@@ -170,7 +170,7 @@ class Parameter(object):
     The Parameter object abstracts out passing parameters into a Software object.
     """
     def __init__(self, *args):
-        self.parameters = args
+        self.parameters = [str(arg) for arg in args]
 
     def __str__(self):
         return ' '.join(self.parameters)
@@ -268,9 +268,8 @@ class BasePipeline(object):
         Adds arguments to this pipeline using the argparse.add_argument() method. The parser
         argument is an argparse.ArgumentParser() object.
         :param parser: argparse.ArgumentParser object
-        :return: argparse.ArgumentParser object, possibly with more arguments
         """
-        return parser
+        pass
 
     def configure(self):
         """
@@ -300,7 +299,7 @@ class BasePipeline(object):
         :param pipeline_config: dict Populated dictionary of pipeline configuration
         :return: None
         """
-        pass
+        raise NotImplementedError
 
     def _parse_config(self):
         try:

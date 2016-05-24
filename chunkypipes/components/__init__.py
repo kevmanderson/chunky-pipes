@@ -262,6 +262,14 @@ class BasePipeline(object):
         """
         return ''
 
+    def dependencies(self):
+        """
+        Override this method.
+        A list of pip style dependencies for this pipeline.
+        :return: list A list of pip style dependencies.
+        """
+        return []
+
     def add_pipeline_args(self, parser):
         """
         Override this method.
@@ -300,6 +308,9 @@ class BasePipeline(object):
         :return: None
         """
         raise NotImplementedError
+
+    def _print_dependencies(self):
+        sys.stdout.write('\n'.join(self.dependencies()) + '\n')
 
     def _parse_config(self):
         try:

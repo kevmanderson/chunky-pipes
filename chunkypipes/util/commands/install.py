@@ -6,6 +6,7 @@ from chunkypipes.util.commands import BaseCommand
 
 ARGV_PIPELINE_NAME = 0
 EXIT_CMD_SUCCESS = 0
+EXIT_CMD_ERROR = 1
 EXIT_CMD_SYNTAX_ERROR = 2
 
 
@@ -45,3 +46,22 @@ class Command(BaseCommand):
         except (IOError, OSError, shutil.Error):
             sys.stdout.write('Pipeline {} could not be installed.\n'.format(pipeline_name))
             sys.exit(EXIT_CMD_SYNTAX_ERROR)
+
+        # Attempt to install dependencies through pip
+        try:
+            from pip import main as pip
+        except ImportError:
+            sys.stderr.write('Your platform or virtual environment does not appear to have pip installed.\n')
+            sys.stderr.write('Dependencies cannot be installed, skipping this step.\n')
+            sys.exit(EXIT_CMD_ERROR)
+
+        pipeline_class = self.get_pipeline_class(pipeline_name)
+        pipeline_dependencies = pipeline_class.dependencies()
+        if pipeline_dependencies:
+            sys.stdout.write('\nAttempting to install the following dependencies:\n')
+            pipeline_class._print_dependencies()
+            install_depencencies = raw_input('\nProceed with dependency installation? [y/n] ')
+            if install_depencencies.lower() in {'no', 'n'}:
+                sys.exit(EXIT_CMD_SUCCESS)
+            for package in pipeline_dependencies:
+                pip(['install', '--upgrade', package])

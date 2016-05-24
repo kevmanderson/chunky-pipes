@@ -12,7 +12,7 @@ EXIT_CMD_SYNTAX_ERROR = 2
 class Command(BaseCommand):
     @staticmethod
     def usage():
-        return 'chunky install <pipeline>'
+        return 'chunky install <pipeline-name> [-h]'
 
     def help_text(self):
         return 'Install a ChunkyPipes formatted pipeline.'
@@ -23,7 +23,7 @@ class Command(BaseCommand):
         pipeline_name = vars(parser.parse_args(command_args))['pipeline-name']
         if pipeline_name.lower() == 'help':
             parser.print_help()
-            sys.exit(0)
+            sys.exit(EXIT_CMD_SUCCESS)
 
         # Check if provided filepath actually exists
         if not os.path.isfile(pipeline_name):

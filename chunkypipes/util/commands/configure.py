@@ -1,6 +1,5 @@
 import sys
 import os
-import imp
 import argparse
 import json
 import readline
@@ -19,20 +18,6 @@ class Command(BaseCommand):
     @staticmethod
     def usage():
         return 'chunky configure <pipeline-name> [-h] [configure_options]'
-
-    def get_pipeline_class(self, pipeline_name):
-        pipeline_filepath = os.path.join(self.home_pipelines,
-                                         '{}.py'.format(pipeline_name))
-
-        # Look for pipeline in installed directory first
-        if os.path.isfile(pipeline_filepath):
-            return imp.load_source(pipeline_name,
-                                   pipeline_filepath.format(pipeline_name)).Pipeline()
-        # Check to see if pipeline name is a full path to pipeline
-        elif os.path.isfile(pipeline_name):
-            return imp.load_source('', pipeline_name).Pipeline()
-        # If none of the above, return None
-        return None
 
     def configure(self, config_dict, blank=False):
         for key in config_dict:
@@ -67,10 +52,19 @@ class Command(BaseCommand):
                                                   'Defaults to install directory.'))
             config_args_parser.add_argument('--blank', action='store_true',
                                             help='Skip configuration and create a blank configuration file.')
+            config_args_parser.add_argument('--show', action='store_true',
+                                            help='Skip configuration and show current default configuration.')
             configure_args = vars(config_args_parser.parse_args(command_args[1:]))
 
             save_location = configure_args['location']
             is_blank = configure_args['blank']
+            is_show = configure_args['show']
+
+            # If --show is invoked, just show current and exit
+            if is_show:
+                if os.path.isfile(os.path.join(self.home_configs, '{}.json'.format(pipeline_name))):
+                    pass
+
 
             # If this config already exists, prompt user before overwrite
             if os.path.isfile(save_location):

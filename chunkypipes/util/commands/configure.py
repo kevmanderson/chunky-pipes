@@ -17,7 +17,7 @@ readline.parse_and_bind('tab: complete')
 class Command(BaseCommand):
     @staticmethod
     def usage():
-        return 'chunky configure <pipeline-name> [-h] [configure_options]'
+        return 'chunky configure <pipeline-name> [-h] [--location LOCATION] [--blank]'
 
     def configure(self, config_dict, blank=False):
         for key in config_dict:
@@ -35,6 +35,11 @@ class Command(BaseCommand):
 
     def run(self, command_args):
         parser = argparse.ArgumentParser(prog='chunky configure', usage=self.usage(), description=self.help_text())
+        parser.add_argument('--location', help=('Path to which to save this config file. ' +
+                                                'Defaults to install directory.'))
+        parser.add_argument('--blank', action='store_true',
+                            help='Skip configuration and create a blank configuration file.')
+
         if not command_args or command_args[ARGV_FIRST_ARGUMENT].lower() in ['-h', '--help', 'help']:
             parser.print_help()
             sys.exit(EXIT_CMD_SUCCESS)
@@ -52,19 +57,10 @@ class Command(BaseCommand):
                                                   'Defaults to install directory.'))
             config_args_parser.add_argument('--blank', action='store_true',
                                             help='Skip configuration and create a blank configuration file.')
-            config_args_parser.add_argument('--show', action='store_true',
-                                            help='Skip configuration and show current default configuration.')
             configure_args = vars(config_args_parser.parse_args(command_args[1:]))
 
             save_location = configure_args['location']
             is_blank = configure_args['blank']
-            is_show = configure_args['show']
-
-            # If --show is invoked, just show current and exit
-            if is_show:
-                if os.path.isfile(os.path.join(self.home_configs, '{}.json'.format(pipeline_name))):
-                    pass
-
 
             # If this config already exists, prompt user before overwrite
             if os.path.isfile(save_location):

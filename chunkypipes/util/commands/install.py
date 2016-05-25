@@ -44,7 +44,8 @@ class Command(BaseCommand):
             shutil.copy2(pipeline_name, self.home_pipelines)
             sys.stdout.write('Pipeline {} successfully installed.\n'.format(pipeline_name))
         except (IOError, OSError, shutil.Error):
-            sys.stdout.write('Pipeline {} could not be installed.\n'.format(pipeline_name))
+            sys.stdout.write('Pipeline {} could not be installed into {}.\n'.format(pipeline_name,
+                                                                                    self.home_pipelines))
             sys.exit(EXIT_CMD_SYNTAX_ERROR)
 
         # Attempt to install dependencies through pip

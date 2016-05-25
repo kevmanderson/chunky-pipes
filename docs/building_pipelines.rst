@@ -2,13 +2,15 @@ Building Pipelines
 ==================
 
 All ChunkyPipes compatible pipelines exist as a ``Pipeline`` class that
-subclasses ``chunkypipes.components.BasePipeline`` and overrides the following
-methods::
+subclasses ``chunkypipes.components.BasePipeline`` and overrides the following methods::
 
     # fun-pipeline.py
     from chunkypipes.components import BasePipeline
 
     class Pipeline(BasePipeline):
+        def dependencies(self):
+            return []
+
         def description(self):
             return ''
 
@@ -20,6 +22,19 @@ methods::
 
         def run_pipeline(self, pipeline_args, pipeline_config):
             pass
+
+Pipeline Dependencies
+^^^^^^^^^^^^^^^^^^^^^
+The pipeline dependencies are all Python packages available via pip that that pipeline uses. The list of dependencies
+is returned as a list of strings, one for each Python package, in the pip format::
+
+    def dependencies(self):
+        return ['numpy', 'scipy==0.17.1']
+
+.. note::
+    If a package is specified with a version, of the form ``package==0.0.0``, ChunkyPipes will attempt to install
+    exactly this version, regardless of what may already be installed on the user's system. Unless a specific version
+    is required to run, don't specify the version.
 
 Pipeline Description
 ^^^^^^^^^^^^^^^^^^^^
@@ -159,6 +174,11 @@ to two Redirects, and up to one Pipe.
         Parameter('-b', '2'),
         Parameter('--float', '3.5'),
         Redirect(stream=Redirect.STDOUT, dest='software1.out')
+    )
+
+    software1.run(
+        Parameter('-c', '3'),
+        shell=True
     )
 
 If ``shell=True`` is given as a parameter, the command will be executed as a string directly in a shell. Otherwise,

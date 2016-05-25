@@ -5,9 +5,9 @@ ChunkyPipes is a framework for easily designing and distributing NGS pipelines w
 
 Running a pipeline with ChunkyPipes can be as simple as::
 
-    $ chunky install easy-pipeline.py
-    $ chunky configure easy-pipeline
-    $ chunky run easy-pipeline [arguments]
+    $ chunky install ngs-pipeline.py
+    $ chunky configure ngs-pipeline
+    $ chunky run ngs-pipeline [arguments]
 
 Table of Contents
 ^^^^^^^^^^^^^^^^^
@@ -18,6 +18,8 @@ Table of Contents
    getting_started
    using_chunkypipes
    building_pipelines
+   faq
    api
+   changelog
    license
    contact

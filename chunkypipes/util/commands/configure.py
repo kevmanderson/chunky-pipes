@@ -19,14 +19,15 @@ class Command(BaseCommand):
     def usage():
         return 'chunky configure <pipeline-name> [-h] [--location LOCATION] [--blank]'
 
-    def configure(self, config_dict, blank=False):
+    def configure(self, config_dict, current_config, blank=False):
         for key in config_dict:
             if type(config_dict[key]) == dict:
-                self.configure(config_dict[key], blank)
+                self.configure(config_dict[key], current_config.get(key, {}), blank)
             else:
                 if not blank:
                     prompt = config_dict[key].strip().strip(':')
-                    config_dict[key] = raw_input(prompt + ': ')
+                    config_dict[key] = (raw_input(prompt + ' [{}]: '.format(current_config.get(key, ''))) or
+                                        current_config.get(key, ''))
                 else:
                     config_dict[key] = ''
 
@@ -77,7 +78,12 @@ class Command(BaseCommand):
             # Get configuration from pipeline, recursively prompt user to fill in info
             config_dict = pipeline_class.configure()
             try:
-                self.configure(config_dict, is_blank)
+                current_config = json.loads(open(os.path.join(self.home_configs,
+                                                              '{}.json'.format(pipeline_name))).read())
+            except:
+                current_config = {}
+            try:
+                self.configure(config_dict, current_config, is_blank)
                 if is_blank:
                     sys.stderr.write('Blank configuration generated.\n')
             except (KeyboardInterrupt, EOFError):

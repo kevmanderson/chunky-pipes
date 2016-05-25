@@ -67,14 +67,17 @@ required by the pipeline.
 ::
 
    $ chunky configure ngs-pipeline
-   > Full path to software1: (User enters) /path/to/soft1
-   > Provide a value for arg1: (User enters) 45
-   > Full path to software2: (User enters) /path/to/soft2
+   > Full path to software1 []: (User enters) /path/to/soft1
+   > Provide a value for arg1 []: (User enters) 45
+   > Full path to software2 []: (User enters) /path/to/soft2
 
 If no ``--location`` parameter is given, the configuration file is
 stored in the ChunkyPipes hidden directory as a JSON formatted file with the same base
 filename as the pipeline. If the user doesn't provide a ``--config`` parameter when running a pipeline, ChunkyPipes
 uses the config file in the hidden directory.
+
+If the user is overwriting an existing configuration, the existing value will be displayed in square brackets
+(``[]``) as a part of the prompt. Leaving this field blank will cause the existing value to be used.
 
 As of version 0.2.0, ChunkyPipes interactive configuration supports TAB-completion for filesystem paths, but not
 left-and-right character seeking.

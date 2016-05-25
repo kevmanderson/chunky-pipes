@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ChunkyPipes',
-    version='0.2.2',
+    version='0.2.3',
     description='Pipeline design and distribution framework',
     license='MIT',
     author='Dominic Fitzgerald',

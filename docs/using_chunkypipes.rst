@@ -12,7 +12,7 @@ hidden directory structure, ChunkyPipes abstracts out filepath details involved 
 
     $ chunky init
 
-If no argument is provided, ChunkyPipes intializes a hidden directory in the home directory. This is also where
+If no argument is provided, ChunkyPipes initializes a hidden directory in the home directory. This is also where
 ChunkyPipes looks by default to install, configure, and run pipelines. If the user wishes to initialize a hidden
 directory at a location other than the home directory, a path argument may be specified. To change where
 ChunkyPipes looks when operating, introduce a ``CHUNKY_HOME`` environment variable and point it to the

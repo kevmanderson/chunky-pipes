@@ -46,6 +46,7 @@ class Command(BaseCommand):
         except (IOError, OSError, shutil.Error):
             sys.stdout.write('Pipeline at {} could not be installed into {}.\n'.format(pipeline_path,
                                                                                        self.home_pipelines))
+            # TODO Why couldn't it be installed?
             sys.exit(EXIT_CMD_SYNTAX_ERROR)
 
         # Attempt to install dependencies through pip

@@ -170,7 +170,11 @@ class Parameter(object):
     The Parameter object abstracts out passing parameters into a Software object.
     """
     def __init__(self, *args):
-        self.parameters = [str(arg) for arg in args]
+        self.parameters = [
+            split_arg
+            for arg in args
+            for split_arg in str(arg).split()
+        ]
 
     def __str__(self):
         return ' '.join(self.parameters)

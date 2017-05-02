@@ -1,9 +1,14 @@
 Change Log
 ==========
 
+Version 0.2.4
+^^^^^^^^^^^^^
+- Released on 18 April 2016
+- Added better logging
+
 Version 0.2.3
 ^^^^^^^^^^^^^
-- Completed on 25 May 2016
+- Released on 25 May 2016
 - Added ``chunky show`` subcommand
 - Restructured the subcommand system so it uses argparse from the beginning
 - Added feature to ``confgure`` to output a blank configuration

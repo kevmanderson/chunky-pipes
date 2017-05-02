@@ -33,8 +33,11 @@ class Software:
 
         # Output log info for this command
         run_cmd = self.__generate_cmd(*args, shell=True)
-        sys.stdout.write(' '.join(['>', time.strftime('%d %b %Y %H:%M:%S'), 'Running', self.software_name]) + '\n')
-        sys.stdout.write(run_cmd + '\n')
+        log_header = 'Running {}\n{}\n'.format(self.software_name, run_cmd)
+        if _Settings.logger._is_active():
+            _Settings.logger._write(log_header)
+        else:
+            sys.stdout.write(log_header)
 
         # If shell is True, execute this command directly as a string
         if shell:
@@ -51,21 +54,30 @@ class Software:
                 stdout_filehandle = None
                 stderr_filehandle = None
 
-                # If this comand isn't the last in the list, that means the output
+                # If this command isn't the last in the list, that means the output
                 # is being piped into the next command
                 if i + 1 < len(cmd_blueprint):
                     stdout_filehandle = subprocess.PIPE
-                # If this is the last command in the list, stdout may be redirected to a file
+                # If this is the last command in the list, stdout may be redirected to a file...
                 elif cmd['stdout']:
                     redir = cmd['stdout']
                     stdout_filehandle = open(redir.dest, redir.mode)
                     output_stream_filehandles.append(stdout_filehandle)
+                # ...or it may be set out to the main log file
+                elif _Settings.logger.log_stdout and _Settings.logger.destination:
+                    stdout_filehandle = subprocess.PIPE
 
                 # stderr can be redirected regardless of piping
                 if cmd['stderr']:
                     redir = cmd['stderr']
                     stderr_filehandle = open(redir.dest, redir.mode)
                     output_stream_filehandles.append(stderr_filehandle)
+                # Or it may be sent out to a log file
+                elif (
+                        _Settings.logger.log_stderr
+                        and (_Settings.logger.destination_stderr or _Settings.logger.destination)
+                ):
+                    stderr_filehandle = subprocess.PIPE
 
                 # Create this process as a Popen object, with appropriate streams
                 process = subprocess.Popen(cmd['cmd'], stdin=stdin_stream,
@@ -75,6 +87,18 @@ class Software:
                 # If this is the last command in the list, wait for it to finish
                 if i + 1 == len(cmd_blueprint):
                     process.wait()
+
+                    # If logging is set, capture stdout (or stderr) to log file
+                    # TODO I think the logic here can be expressed more concisely
+                    if _Settings.logger.log_stdout and _Settings.logger.destination:
+                        for line in process.stdout:
+                            _Settings.logger._write(line)
+                    if (
+                            _Settings.logger.log_stderr
+                            and (_Settings.logger.destination_stderr or _Settings.logger.destination)
+                    ):
+                        for line in process.stderr:
+                            _Settings.logger._write(line, bool(_Settings.logger.destination_stderr))
 
             # Close all the file handles created for redirects
             map(lambda f: f.close(), output_stream_filehandles)
@@ -104,9 +128,9 @@ class Software:
         shell = kwargs.get('shell', False)
         # If shell=True, return a full command string
         if shell:
-            return '{software_path} {parameters}'.format(
+            return '{software_path}{parameters}'.format(
                 software_path=self.software_path,
-                parameters=' '.join([str(p) for p in args])
+                parameters=' '.join([''] + [str(p) for p in args])
             )
 
         # If shell=False, we have to get much fancier
@@ -191,10 +215,10 @@ class Redirect(object):
     STDERR_APPEND = 4
     BOTH_APPEND = 5
     NULL = os.devnull
-    _APPEND_MODES = [STDOUT_APPEND, STDERR_APPEND, BOTH_APPEND]
-    _STDOUT_MODES = [STDOUT, STDOUT_APPEND]
-    _STDERR_MODES = [STDERR, STDERR_APPEND]
-    _BOTH_MODES = [BOTH, BOTH_APPEND]
+    _APPEND_MODES = {STDOUT_APPEND, STDERR_APPEND, BOTH_APPEND}
+    _STDOUT_MODES = {STDOUT, STDOUT_APPEND}
+    _STDERR_MODES = {STDERR, STDERR_APPEND}
+    _BOTH_MODES = {BOTH, BOTH_APPEND}
 
     _convert = {
         '>': STDOUT,
@@ -249,6 +273,131 @@ class Pipe(object):
         return '| ' + self.piped_software.cmd(*self.piped_args)
 
 
+class _Settings(object):
+    class _Logger:
+        def __init__(self):
+            """
+            Initialize default logging settings. If destination is not None, the logger is 
+            considered active and will capture all output stream content from pipeline 
+            programs that isn't redirected explicitly by the user.
+            
+            If destination_stderr is not None, any capture stderr output will be shuttled 
+            into it's own file, the value of destination_stderr. Otherwise, it'll be mixed 
+            in with the stdout file.
+            
+            If either log_stdout or log_stderr are false, that particular output stream will 
+            be left alone, and probably sent to the screen.
+            """
+            self.destination = None
+            self.destination_mode = 'w'
+            self.destination_stderr = None
+            self.destination_stderr_mode = None
+
+            self.log_stdout = True
+            self.log_stderr = True
+
+            self._dest_filehandle = None
+            self._dest_stderr_filehandle = None
+
+        def set(self, **kwargs):
+            """
+            User calls this method to set logger settings based on keywords. When the user 
+            changes destination or destination_stderr, operations are performed to open 
+            up a filehandle and make it available globally.
+            
+            If an exception occurs while trying to open either of the log files, it will 
+            fail silently. allowing that output stream to go to the screen as a default.
+            
+            TODO Prevent from creating an empty stderr.log file
+            :param kwargs: dict Logger settings to set
+            """
+            for kw in ('destination_mode', 'destination_stderr_mode'):
+                # Set file mode flags
+                if kw in kwargs:
+                    setattr(self, kw, str(kwargs[kw]))
+
+            for kw in ('log_stdout', 'log_stderr'):
+                # Set whether to log for either output stream
+                if kw in kwargs:
+                    setattr(self, kw, bool(kwargs[kw]))
+
+            if 'destination' in kwargs and kwargs['destination']:
+                # Set default destination path and open file
+                try:
+                    self.destination = str(kwargs['destination'])
+
+                    # If directory to the log doesn't exist, create it
+                    logdir = os.path.dirname(self.destination)
+                    if logdir and not os.path.exists(logdir):
+                        os.makedirs(logdir, mode=0755)
+
+                    # Open destination filehandle
+                    if self._dest_filehandle is not None:
+                        self._dest_filehandle.close()
+                    self._dest_filehandle = open(self.destination, self.destination_mode)
+                except Exception as e:
+                    # If anything goes wrong, reset everything
+                    self.destination = None
+                    sys.stderr.write('Error opening log file for stdout\n{}\n'.format(e.message))
+
+            if 'destination_stderr' in kwargs and kwargs['destination_stderr']:
+                try:
+                    self.destination_stderr = str(kwargs['destination_stderr'])
+
+                    # If directory to the stderr log doesn't exist, create it
+                    logdir_stderr = os.path.dirname(self.destination_stderr)
+                    if logdir_stderr and not os.path.exists(logdir_stderr):
+                        os.makedirs(logdir_stderr, mode=0755)
+
+                    # Open destination_stderr filehandle
+                    stderr_mode = (self.destination_stderr_mode
+                                   if self.destination_stderr_mode
+                                   else self.destination_mode)
+                    if self._dest_stderr_filehandle is not None:
+                        self._dest_stderr_filehandle.close()
+                    self._dest_stderr_filehandle = open(self.destination_stderr, stderr_mode)
+                except Exception as e:
+                    # If anything goes wrong, reset everything
+                    self.destination_stderr = None
+                    sys.stderr.write('Error opening log file for stderr\n{}\n'.format(e.message))
+
+        def _is_active(self):
+            return bool(self.destination)
+
+        def _write(self, s, to_stderr_log=False, timestamp=True):
+            """
+            Writes out string s to a given filehandle, with optional timestamp.
+            This method is used to capture all output streams from various pipeline programs 
+            that aren't explicitly redirected into a single log file.
+            :param s: str Captured output stream content
+            :param to_stderr_log: bool Whether to write contents to separate stderr file
+            :param timestamp: bool Whether to prepend a timestamp to every line of output
+            """
+            if timestamp:
+                line = '{}>\t{}'.format(time.strftime('%d%b%Y %H:%M:%S'), s)
+            else:
+                line = '\t' + s
+
+            logfh = self._dest_stderr_filehandle if to_stderr_log else self._dest_filehandle
+            if logfh is not None:
+                logfh.write(line)
+
+        def _close_all(self):
+            """
+            Closes all open filehandles. Also Nones the file destinations.
+            """
+            if self._dest_filehandle is not None:
+                self._dest_filehandle.close()
+                self._dest_filehandle = None
+                self.destination = None
+            if self._dest_stderr_filehandle is not None:
+                self._dest_stderr_filehandle.close()
+                self._dest_stderr_filehandle = None
+                self.destination_stderr = None
+
+    logger = _Logger()
+
+
 class BasePipeline(object):
     """
     The BasePipeline object is meant to be an abstract class for a Pipeline class. This
@@ -257,6 +406,7 @@ class BasePipeline(object):
     """
     pipeline_args = None
     pipeline_config = None
+    settings = _Settings()
 
     def description(self):
         """
@@ -312,6 +462,10 @@ class BasePipeline(object):
         :return: None
         """
         raise NotImplementedError
+
+    def _run_pipeline(self, pipeline_args, pipeline_config):
+        self.run_pipeline(pipeline_args=pipeline_args, pipeline_config=pipeline_config)
+        self.settings.logger._close_all()
 
     def _print_dependencies(self):
         sys.stdout.write('\n'.join(self.dependencies()) + '\n')

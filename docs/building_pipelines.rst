@@ -239,3 +239,57 @@ Software receiving the pipe should call the ``pipe()`` method instead of ``run()
 
 If a Pipe is passed into a Software ``run()`` any Redirects of STDOUT are ignored. Multiple Pipes will be ignored
 except for the first one.
+
+Pipeline Settings
+^^^^^^^^^^^^^^^^^
+ChunkyPipes can be configured on a pipeline specific manner to handle certain under-the-hood features. All settings
+are exposed in the ``run_pipeline()`` function through the ``self.settings`` instance variable.
+
+self.settings.logger
+~~~~~~~~~~~~~~~~~~~~
+The ChunkyPipes logger will by default allow any non-redirected software output to flow to the screen. If a necessary
+minimum of logger settings are given values, the logger will capture all non-redirected software output to a timestamped
+log file.
+
+Logger settings are set with the function ``self.settings.logger.set()`` and given any number of the following
+keyword arguments:
+
+============================  ========  ============
+Keyword Argument              Default   Description
+============================  ========  ============
+``destination``               ``''``    If given a value, all non-redirected stdout streams will go to this
+                                        file. If ``destination_stderr`` is not given a value and ``log_stderr`` is
+                                        ``True`` (which it is by default), then all non-redirected stderr streams
+                                        will go to this file as well.
+``destination_mode``          ``'w'``   Write mode of the log file. Use standard Python file modes.
+``destination_stderr``        ``''``    If give a value, all non-redirected stderr streams will go to this
+                                        file, independent of the value of ``destination``.
+``destination_stderr_mode``   ``'w'``   Write mode of the stderr specific log file, if ``destination_stderr`` is given
+                                        a value. Use standard Python file modes.
+``log_stdout``                ``True``  If ``True``, will capture all non-redirected stdout streams.
+``log_stderr``                ``True``  If ``True``, will capture all non-redirected stderr streams.
+============================  ========  ============
+
+An example::
+
+    from chunkypipes.components import Software, Parameter, Redirect
+
+    def run_pipeline(self, pipeline_args, pipeline_config):
+        ls = Software('ls', '/bin/ls')
+
+        # This run output will go to the screen, since logging settings have not been set
+        # nor was any of the output redirected
+        ls.run()
+
+        self.settings.logger.set(
+            destination='logs/run.log'
+        )
+
+        # This run output will go to the log file at logs/run.log, as specified in the settings.
+        # The log entries will be timestamped
+        ls.run()
+
+        # This run output will go to where it's been redirected, ignoring any logging settings
+        ls.run(
+            Redirect(stream=Redirect.STDOUT, dest='logs/ls.log')
+        )

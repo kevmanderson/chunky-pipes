@@ -7,7 +7,7 @@ import os
 EXIT_ERROR = 1
 
 
-class Software:
+class Software(object):
     """
     The Software object is the main unit in command execution. It is instantiated with a name and
     a path, and commands are executed primarily with the run() method, which takes an arbitrary

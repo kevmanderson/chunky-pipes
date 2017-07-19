@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
             # Parse pipeline config and run pipeline
             pipeline_class._parse_config()
-            pipeline_class.run_pipeline(
+            pipeline_class._run_pipeline(
                 pipeline_args=pipeline_class.pipeline_args,
                 pipeline_config=pipeline_class.pipeline_config
             )

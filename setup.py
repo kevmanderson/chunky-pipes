@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='ChunkyPipes',
-    version='0.2.3',
+    version='0.2.4',
     description='Pipeline design and distribution framework',
     license='MIT',
     author='Dominic Fitzgerald',
     author_email='dominicfitzgerald11@gmail.com',
     url='https://github.com/djf604/chunky-pipes',
-    download_url='https://github.com/djf604/chunky-pipes/tarball/0.2.3',
+    download_url='https://github.com/djf604/chunky-pipes/tarball/0.2.4',
     packages=find_packages(),
     entry_points={
         'console_scripts': ['chunky = chunkypipes.util:execute_from_command_line']

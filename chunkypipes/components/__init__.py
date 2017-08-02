@@ -12,8 +12,9 @@ class Software(object):
     The Software object is the main unit in command execution. It is instantiated with a name and
     a path, and commands are executed primarily with the run() method, which takes an arbitrary
     number of Parameter, Redirect, and Pipe objects. Software also takes a single keyword argument,
-    shell, which when True will run the command directly on the shell as a string. Shell defaults
-    to False for shell injection security reasons.
+    shell, which when True will run the command directly on the shell as a string.
+
+    cmd(self, *args) removed in version 0.2.5
     """
     def __init__(self, software_name, software_path):
         self.software_name = software_name
@@ -21,42 +22,65 @@ class Software(object):
 
     def run(self, *args, **kwargs):
         """
-        Run this program with Parameters, Redirects, and Pipes. If shell=True, this command is
-        executed as a string directly on the shell; otherwise, it's executed using Popen processes
-        and appropriate streams.
+        Run this program with Parameters, Redirects, and Pipes. Prepares and immediately runs the
+        returned SoftwareBlueprint() objectIf shell=True, this command is executed as a string
+        directly on the shell; otherwise, it's executed using Popen processes and appropriate streams.
         :param args: 0 or more of Parameter, Redirect, and Pipe
         :param kwargs: shell=Bool
-        :return: None
         """
-        # Get default for kwarg shell
-        shell = kwargs.get('shell', False)
+        self.prep(*args, **kwargs).run()
 
+    def pipe(self, *args, **kwargs):
+        """
+        This is a deprecated method, use prep() instead
+        """
+        return self.prep(*args, **kwargs)
+
+    def prep(self, *args, **kwargs):
+        """
+        Prepares and returns a SoftwareBlueprint() object based on the Software() object
+        :param args: 0 or more of Parameter, Redirect, and Pipe
+        :param kwargs: shell=Bool
+        :return: SoftwareBlueprint The blueprint object
+        """
+        return SoftwareBlueprint(self.software_path, *args, **kwargs)
+
+
+class SoftwareBlueprint(object):
+    """
+    The SoftwareBlueprint object is responsible for actually assembling and executing programs and
+    parameters.
+    """
+    def __init__(self, software_path, *args, **kwargs):
+        self.shell = kwargs.get('shell', False)
+        self.blueprint = SoftwareBlueprint._generate_blueprint(software_path, *args)
+        # self.software_path = software_path
+
+    def run(self):
         # Output log info for this command
-        run_cmd = self.__generate_cmd(*args, shell=True)
-        log_header = 'Running {}\n{}\n'.format(self.software_name, run_cmd)
+        software_name = 'TODO'
+        log_header = 'Running {}\n{}\n'.format(software_name, str(self))
         if _Settings.logger._is_active():
             _Settings.logger._write(log_header)
         else:
             sys.stdout.write(log_header)
 
-        # If shell is True, execute this command directly as a string
-        if shell:
-            subprocess.call(run_cmd, shell=True, executable=os.environ['SHELL'])  #TODO Check to see if this works on Windows
+        # TODO Pre-run callback hook
+        if self.shell:
+            subprocess.call(str(self), shell=True, executable=os.environ['SHELL'])
         else:
-            # Get the command blueprint for this call
-            cmd_blueprint = self.__generate_cmd(*args, shell=False)
-            output_stream_filehandles = []
-            blueprint_processes = []
+            output_stream_filehandles = list()
+            blueprint_processes = list()
 
             # For each command in the blueprint, set up streams and Popen object to execute
-            for i, cmd in enumerate(cmd_blueprint):
+            for i, cmd in enumerate(self.blueprint):
                 stdin_stream = None if i == 0 else blueprint_processes[i - 1].stdout
                 stdout_filehandle = None
                 stderr_filehandle = None
 
                 # If this command isn't the last in the list, that means the output
                 # is being piped into the next command
-                if i + 1 < len(cmd_blueprint):
+                if i + 1 < len(self.blueprint):
                     stdout_filehandle = subprocess.PIPE
                 # If this is the last command in the list, stdout may be redirected to a file...
                 elif cmd['stdout']:
@@ -85,7 +109,7 @@ class Software(object):
                 blueprint_processes.append(process)
 
                 # If this is the last command in the list, wait for it to finish
-                if i + 1 == len(cmd_blueprint):
+                if i + 1 == len(self.blueprint):
                     process.wait()
 
                     # If logging is set, capture stdout (or stderr) to log file
@@ -103,90 +127,70 @@ class Software(object):
             # Close all the file handles created for redirects
             map(lambda f: f.close(), output_stream_filehandles)
 
-    def cmd(self, *args):
-        """
-        Get this command as a string.
-        :param args: 0 or more of Parameter, Redirect, and Pipe
-        :return: str Command as a string
-        """
-        return self.__generate_cmd(*args, shell=True)
-
-    def pipe(self, *args):
-        """
-        Get a dictionary containing this Software object, as well as the
-        arguments passed to this function. This is the method that should be
-        called on Software inside a Pipe() argument to another Software.
-        :param args: 0 or more of Parameter, Redirect, and Pipe
-        :return: dict Dictionary containing this Software object and arguments
-        """
-        return {
-            'software': self,
-            'args': args
-        }
-
-    def __generate_cmd(self, *args, **kwargs):
-        shell = kwargs.get('shell', False)
+    @staticmethod
+    def _generate_blueprint(software_path, *args):
+        # shell = kwargs.get('shell', False)
         # If shell=True, return a full command string
-        if shell:
-            return '{software_path}{parameters}'.format(
-                software_path=self.software_path,
-                parameters=' '.join([''] + [str(p) for p in args])
-            )
+        # if shell:
+        #     return '{software_path}{parameters}'.format(
+        #         software_path=software_path,
+        #         parameters=' '.join([''] + [str(p) for p in args])
+        #     )
 
         # If shell=False, we have to get much fancier
-        def construct_blueprint(blueprint, software_path, args):
-            """
-            Recursive function meant to construct the command blueprint from a tree of arguments.
-            Only called for as many Pipe objects that exist.
-            :param blueprint: list Contains commands, passed into itself recursively if necessary
-            :param software_path: str Becomes the first item in the list of arguments for Popen
-            :param args: list Arguments from which to construct a command
-            :return: list All commands generated by this function
-            """
-            # Break up software call into constituent parts
-            cmd_parts = {
-                'Parameter': [para for para in args if type(para) == Parameter],
-                'Redirect': [redir for redir in args if type(redir) == Redirect],
-                'Pipe': [pipe for pipe in args if type(pipe) == Pipe]
-            }
+        cmd_parts = {
+            'Parameter': [para for para in args if isinstance(para, Parameter)],
+            'Redirect': [redir for redir in args if isinstance(redir, Redirect)],
+            'Pipe': [pipe for pipe in args if isinstance(pipe, Pipe)]
+        }
 
-            # If there is more than 2 redirects or 1 pipe, ignore extras
-            if len(cmd_parts['Redirect']) > 2:
-                cmd_parts['Redirect'] = cmd_parts['Redirect'][:2]
-            if len(cmd_parts['Pipe']) > 1:
-                cmd_parts['Pipe'] = cmd_parts['Pipe'][:1]
+        # If there is more than 2 redirects or 1 pipe, ignore extras
+        if len(cmd_parts['Redirect']) > 2:
+            cmd_parts['Redirect'] = cmd_parts['Redirect'][:2]
+        if len(cmd_parts['Pipe']) > 1:
+            cmd_parts['Pipe'] = cmd_parts['Pipe'][:1]
 
-            # Set software path and parameters list
-            cmd = software_path.split()
-            for para in cmd_parts['Parameter']:
-                cmd += para.parameters
+        # Set software path and parameters list
+        cmd = software_path.split()
+        for para in cmd_parts['Parameter']:
+            cmd += para.parameters
 
-            # Set appropriate Redirect objects
-            stdout, stderr = None, None
-            for redir in cmd_parts['Redirect']:
-                if redir.stream in Redirect._STDOUT_MODES:
-                    stdout = redir
-                elif redir.stream in Redirect._STDERR_MODES:
-                    stderr = redir
-                elif redir.stream in Redirect._BOTH_MODES:
-                    stdout, stderr = redir, redir
+        # Set appropriate Redirect objects
+        stdout, stderr = None, None
+        for redir in cmd_parts['Redirect']:
+            if redir.stream in Redirect._STDOUT_MODES:
+                stdout = redir
+            elif redir.stream in Redirect._STDERR_MODES:
+                stderr = redir
+            elif redir.stream in Redirect._BOTH_MODES:
+                stdout, stderr = redir, redir
 
-            # Add this software command to the blueprint
-            blueprint.append({
-                'cmd': cmd,
-                'stdout': stdout,
-                'stderr': stderr
-            })
+        # Add this software command to the blueprint
+        blueprint = [{
+            'cmd': cmd,
+            'stdout': stdout,
+            'stderr': stderr
+        }]
 
-            # Recurse if there is a Pipe
-            if cmd_parts['Pipe']:
-                pipe = cmd_parts['Pipe'][0]
-                construct_blueprint(blueprint, pipe.piped_software.software_path, pipe.piped_args)
+        # Recurse if there is a Pipe
+        if cmd_parts['Pipe']:
+            pipe = cmd_parts['Pipe'][0]
+            blueprint.extend(pipe.piped_software_blueprint.blueprint)
 
-        # Construct command blueprint and return
-        cmd_execution_blueprint = []
-        construct_blueprint(cmd_execution_blueprint, self.software_path, args)
-        return cmd_execution_blueprint
+        return blueprint
+
+    def __unicode__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return ' | '.join([
+            '{cmd}{redir_out}{redir_err}'.format(
+                cmd=' '.join(cmd['cmd']),
+                redir_out='' if not isinstance(cmd['stdout'], Redirect) else ' ' + str(cmd['stdout']),
+                redir_err='' if not isinstance(cmd['stderr'], Redirect) else ' ' + str(cmd['stderr'])
+            )
+            for cmd in self.blueprint
+        ])
 
 
 class Parameter(object):
@@ -256,21 +260,11 @@ class Redirect(object):
 
 
 class Pipe(object):
-    """
-    The Pipe object abstracts out piping the output of one Software into
-    the input of another Software. The instantiation argument for Pipe is
-    meant to be the result of the Software.pipe() method.
-    """
-    def __init__(self, piped_software_dict):
-        try:
-            self.piped_software = piped_software_dict['software']
-            self.piped_args = piped_software_dict['args']
-        except TypeError as e:
-            sys.stderr.write('Software was not piped together correctly\n')
-            sys.stderr.write(e.message)
+    def __init__(self, piped_software_blueprint):
+        self.piped_software_blueprint = piped_software_blueprint
 
     def __str__(self):
-        return '| ' + self.piped_software.cmd(*self.piped_args)
+        return str(self.piped_software_blueprint)
 
 
 class _Settings(object):

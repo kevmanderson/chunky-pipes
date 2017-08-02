@@ -59,7 +59,7 @@ def execute_from_command_line(argv=None):
 
     # Add a subparser for each subcommand
     for chunky_command, chunky_command_class in chunky_command_classes.iteritems():
-        subparsers.add_parser(chunky_command, help=chunky_command_class.help_text())
+        subparsers.add_parser(chunky_command.replace('_', '-'), help=chunky_command_class.help_text())
 
     if len(sys.argv) == 1:
         # If no arguments were given, print help

@@ -4,7 +4,42 @@ import json
 import sys
 import os
 
+from pathos.multiprocessing import ProcessPool
+
+
 EXIT_ERROR = 1
+
+
+class ParallelBlock(object):
+    _run_method_map = {
+        'multiprocess': '_run_multiprocess'
+    }
+
+    def __init__(self, method='multiprocess', block=True, cores=None):
+        self.method = method
+        self.should_block = block
+        self.cores = cores
+
+        self.software = list()
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        pass
+
+    def add(self, *args):
+        self.software.extend(args)
+
+    def run(self):
+        getattr(self, self._run_method_map.get(self.method, 'multiprocess'))()
+
+    def _run_multiprocess(self):
+        pool = ProcessPool(nodes=self.cores)
+        sentinel = None
+        for software_prep in self.software:
+            sentinel = pool.apipe(software_prep.run)
+        sentinel.wait()
 
 
 class Software(object):
@@ -323,7 +358,7 @@ class _Settings(object):
                     # If directory to the log doesn't exist, create it
                     logdir = os.path.dirname(self.destination)
                     if logdir and not os.path.exists(logdir):
-                        os.makedirs(logdir, mode=0755)
+                        os.makedirs(logdir, mode=0o755)
 
                     # Open destination filehandle
                     if self._dest_filehandle is not None:
@@ -341,7 +376,7 @@ class _Settings(object):
                     # If directory to the stderr log doesn't exist, create it
                     logdir_stderr = os.path.dirname(self.destination_stderr)
                     if logdir_stderr and not os.path.exists(logdir_stderr):
-                        os.makedirs(logdir_stderr, mode=0755)
+                        os.makedirs(logdir_stderr, mode=0o755)
 
                     # Open destination_stderr filehandle
                     stderr_mode = (self.destination_stderr_mode

@@ -262,7 +262,7 @@ Keyword Argument              Default   Description
                                         ``True`` (which it is by default), then all non-redirected stderr streams
                                         will go to this file as well.
 ``destination_mode``          ``'w'``   Write mode of the log file. Use standard Python file modes.
-``destination_stderr``        ``''``    If give a value, all non-redirected stderr streams will go to this
+``destination_stderr``        ``''``    If given a value, all non-redirected stderr streams will go to this
                                         file, independent of the value of ``destination``.
 ``destination_stderr_mode``   ``'w'``   Write mode of the stderr specific log file, if ``destination_stderr`` is given
                                         a value. Use standard Python file modes.

@@ -141,11 +141,16 @@ class SoftwareBlueprint(object):
                 # Create this process as a Popen object, with appropriate streams
                 process = subprocess.Popen(cmd['cmd'], stdin=stdin_stream,
                                  stdout=stdout_filehandle, stderr=stderr_filehandle)
+                print('process.stdout is {}'.format(process.stdout))
                 blueprint_processes.append(process)
 
                 # If this is the last command in the list, wait for it to finish
                 if i + 1 == len(self.blueprint):
-                    process.wait()
+                    print(self.blueprint)
+                    # print(process)
+                    process.communicate()
+                    # print(process)
+                    # print('process.stdout is {}'.format(process.stdout))
 
                     # If logging is set, capture stdout (or stderr) to log file
                     # TODO I think the logic here can be expressed more concisely
@@ -451,7 +456,7 @@ class BasePipeline(object):
         A list of pip style dependencies for this pipeline.
         :return: list A list of pip style dependencies.
         """
-        return []
+        return list()
 
     def add_pipeline_args(self, parser):
         """
@@ -477,7 +482,7 @@ class BasePipeline(object):
         terminal string values replaced with user input values.
         :return: dict Dictionary representation of config values
         """
-        return {}
+        return dict()
 
     def run_pipeline(self, pipeline_args, pipeline_config):
         """

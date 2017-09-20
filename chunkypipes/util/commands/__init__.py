@@ -3,9 +3,7 @@ import imp
 
 
 class BaseCommand(object):
-    chunky_home = (os.path.expanduser('~')
-                   if 'CHUNKY_HOME' not in os.environ
-                   else os.environ['CHUNKY_HOME'])
+    chunky_home = os.environ.get('CHUNKY_HOME') or os.path.expanduser('~')
     home_pipelines = os.path.join(chunky_home, '.chunky', 'pipelines')
     home_configs = os.path.join(chunky_home, '.chunky', 'configs')
 

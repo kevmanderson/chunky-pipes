@@ -4,6 +4,11 @@ import shutil
 import argparse
 from chunkypipes.util.commands import BaseCommand
 
+try:
+    from pip import main as pip
+except ImportError:
+    pass
+
 ARGV_PIPELINE_NAME = 0
 EXIT_CMD_SUCCESS = 0
 EXIT_CMD_ERROR = 1
@@ -21,8 +26,10 @@ class Command(BaseCommand):
     def run(self, command_args):
         parser = argparse.ArgumentParser(prog='chunky install', usage=self.usage(), description=self.help_text())
         parser.add_argument('pipeline-path', help='Full path to a ChunkyPipes formatted pipeline to install.')
-        pipeline_path = vars(parser.parse_args(command_args))['pipeline-path']
-        if pipeline_path.lower() == 'help':
+        parser.add_argument('-y', action='store_true', help='Install all dependency packages without asking.')
+        args = vars(parser.parse_args(command_args))
+        pipeline_path = args['pipeline-path']
+        if pipeline_path.strip().lower() == 'help':
             parser.print_help()
             sys.exit(EXIT_CMD_SUCCESS)
 
@@ -50,9 +57,7 @@ class Command(BaseCommand):
             sys.exit(EXIT_CMD_SYNTAX_ERROR)
 
         # Attempt to install dependencies through pip
-        try:
-            from pip import main as pip
-        except ImportError:
+        if 'pip' not in globals():
             sys.stderr.write('Your platform or virtual environment does not appear to have pip installed.\n')
             sys.stderr.write('Dependencies cannot be installed, skipping this step.\n')
             sys.exit(EXIT_CMD_ERROR)
@@ -62,8 +67,11 @@ class Command(BaseCommand):
         if pipeline_dependencies:
             sys.stdout.write('\nAttempting to install the following dependencies:\n')
             pipeline_class._print_dependencies()
-            install_depencencies = raw_input('\nProceed with dependency installation? [y/n] ')
-            if install_depencencies.lower() in {'no', 'n'}:
-                sys.exit(EXIT_CMD_SUCCESS)
+
+            if not args['y']:
+                install_depencencies = raw_input('\nProceed with dependency installation? [y/n] ')
+                if install_depencencies.lower() in {'no', 'n', 'nope', 'nada', 'nah'}:
+                    sys.exit(EXIT_CMD_SUCCESS)
             for package in pipeline_dependencies:
                 pip(['install', '--upgrade', package])
+

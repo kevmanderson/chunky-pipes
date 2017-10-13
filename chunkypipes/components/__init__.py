@@ -15,24 +15,28 @@ class ParallelBlock(object):
         'multiprocess': '_run_multiprocess'
     }
 
-    def __init__(self, method='multiprocess', block=True, cores=None):
+    def __init__(self, method='multiprocess', block=True, cores=None, autorun=True):
         self.method = method
         self.should_block = block
         self.cores = cores
+        self.autorun = bool(autorun)
+        self.has_run = False
 
         self.software = list()
 
     def __enter__(self):
-        pass
+        return self
 
     def __exit__(self, *args):
-        pass
+        if not self.has_run and self.autorun:
+            self.run()
 
     def add(self, *args):
         self.software.extend(args)
 
     def run(self):
         getattr(self, self._run_method_map.get(self.method, 'multiprocess'))()
+        self.has_run = True
 
     def _run_multiprocess(self):
         pool = ProcessPool(nodes=self.cores)

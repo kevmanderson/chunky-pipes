@@ -221,14 +221,14 @@ parameters: ``stream`` and ``dest``.
 Pipe
 ~~~~
 The ``chunkypipes.components.Pipe`` object represents piping the output of one program into the input of another. The
-Software receiving the pipe should call the ``pipe()`` method instead of ``run()``::
+Software receiving the pipe should call the ``prep()`` method instead of ``run()``::
 
     from chunkypipes.components import Parameter, Redirect, Pipe
 
     software1.run(
         Parameter('-a', '1'),
         Pipe(
-            software2.pipe(
+            software2.prep(
                 Parameter('-b', '2'),
                 Parameter('-c', '3'),
                 Redirect(stream=Redirect.STDOUT, dest='software2.out')
@@ -237,8 +237,39 @@ Software receiving the pipe should call the ``pipe()`` method instead of ``run()
     )
     # soft1 -a 1 | soft2 -b 2 -c 3 > software2.out
 
+.. note:: The ``pipe()`` method of ``Software`` has been deprecated in favor of the ``prep()`` as of version 0.2.5
+
 If a Pipe is passed into a Software ``run()`` any Redirects of STDOUT are ignored. Multiple Pipes will be ignored
 except for the first one.
+
+ParallelBlock
+~~~~~~~~~~~~~
+The ``chunkypipes.components.ParallelBlock`` object represents a block of commands to be run in parallel. The execution
+of the pipeline will wait until all software in the parallel block is done running, but all software in the block will
+run in parallel::
+
+    from chunkypipes.components import Parameter, ParallelBlock
+
+    with ParallelBlock() as pblock:
+        pblock.add(
+            software1.prep(
+                Parameter('-a', '1')
+            )
+        )
+
+        pblock.add(
+            software2.prep(
+                Parameter('-b', '2'),
+                Parameter('-c', '3')
+            )
+        )
+
+    # This command won't execute until both software1 and software2 are finished executing
+    software3.run(
+        Parameter('-d', '4')
+    )
+
+By default, the parallel block executes when the ``with`` block ends without the need for an explicit method call.
 
 Pipeline Settings
 ^^^^^^^^^^^^^^^^^

@@ -141,25 +141,21 @@ class SoftwareBlueprint(object):
                 # Create this process as a Popen object, with appropriate streams
                 process = subprocess.Popen(cmd['cmd'], stdin=stdin_stream,
                                  stdout=stdout_filehandle, stderr=stderr_filehandle)
-                print('process.stdout is {}'.format(process.stdout))
                 blueprint_processes.append(process)
 
                 # If this is the last command in the list, wait for it to finish
                 if i + 1 == len(self.blueprint):
-                    print(self.blueprint)
-                    # print(process)
-                    process.communicate()
-                    # print(process)
-                    # print('process.stdout is {}'.format(process.stdout))
+                    process.wait()
 
                     # If logging is set, capture stdout (or stderr) to log file
                     # TODO I think the logic here can be expressed more concisely
-                    if _Settings.logger.log_stdout and _Settings.logger.destination:
+                    if _Settings.logger.log_stdout and _Settings.logger.destination and process.stdout:
                         for line in process.stdout:
                             _Settings.logger._write(line)
                     if (
                             _Settings.logger.log_stderr
                             and (_Settings.logger.destination_stderr or _Settings.logger.destination)
+                            and process.stderr
                     ):
                         for line in process.stderr:
                             _Settings.logger._write(line, bool(_Settings.logger.destination_stderr))

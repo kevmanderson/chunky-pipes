@@ -15,7 +15,7 @@ class Command(BaseCommand):
         # Get argparse help funtionality
         argparse.ArgumentParser(prog='chunky list', description=self.help_text()).parse_args(command_args)
 
-        sys.stdout.write('Installed pipelines (in {}):\n\n'.format(self.home_pipelines))
+        sys.stderr.write('Installed pipelines (in {}):\n\n'.format(self.home_pipelines))
 
         # Grab the installed files from both directories
         installed_pipelines = {os.path.splitext(pipeline)[BASENAME] for pipeline
@@ -26,6 +26,6 @@ class Command(BaseCommand):
 
         for pipeline_name in installed_pipelines:
             if '{}.json'.format(pipeline_name) in installed_configs:
-                print '{} is configured'.format(pipeline_name)
+                sys.stderr.write('{} is configured\n'.format(pipeline_name))
             else:
-                print '{} is NOT configured'.format(pipeline_name)
+                sys.stderr.write('{} is NOT configured\n'.format(pipeline_name))

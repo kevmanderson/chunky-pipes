@@ -45,7 +45,7 @@ class Command(BaseCommand):
             )
         else:
             # If pipeline class doesn't exist, exit immediately
-            sys.stdout.write('Pipeline {name} does not exist in {home}\n'.format(
+            sys.stderr.write('Pipeline {name} does not exist in {home}\n'.format(
                 name=pipeline_name,
                 home=self.home_pipelines + '/'
             ))

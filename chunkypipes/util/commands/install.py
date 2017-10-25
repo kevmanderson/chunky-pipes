@@ -3,6 +3,7 @@ import os
 import shutil
 import argparse
 from chunkypipes.util.commands import BaseCommand
+import six.moves
 
 try:
     from pip import main as pip
@@ -40,7 +41,7 @@ class Command(BaseCommand):
 
         # Check if pipeline already exists
         if os.path.isfile(os.path.join(self.home_pipelines, os.path.basename(pipeline_path))):
-            overwrite = raw_input('Pipeline {} is already installed, overwrite? [y/n] '.format(
+            overwrite = six.moves.input('Pipeline {} is already installed, overwrite? [y/n] '.format(
                     os.path.basename(pipeline_path)
             ))
             if overwrite.lower() in {'no', 'n'}:
@@ -49,9 +50,9 @@ class Command(BaseCommand):
         # Copy pipeline file
         try:
             shutil.copy2(pipeline_path, self.home_pipelines)
-            sys.stdout.write('Pipeline {} successfully installed.\n'.format(os.path.basename(pipeline_path)))
+            sys.stderr.write('Pipeline {} successfully installed.\n'.format(os.path.basename(pipeline_path)))
         except (IOError, OSError, shutil.Error):
-            sys.stdout.write('Pipeline at {} could not be installed into {}.\n'.format(pipeline_path,
+            sys.stderr.write('Pipeline at {} could not be installed into {}.\n'.format(pipeline_path,
                                                                                        self.home_pipelines))
             # TODO Why couldn't it be installed?
             sys.exit(EXIT_CMD_SYNTAX_ERROR)
@@ -65,13 +66,12 @@ class Command(BaseCommand):
         pipeline_class = self.get_pipeline_class(pipeline_path)
         pipeline_dependencies = pipeline_class.dependencies()
         if pipeline_dependencies:
-            sys.stdout.write('\nAttempting to install the following dependencies:\n')
+            sys.stderr.write('\nAttempting to install the following dependencies:\n')
             pipeline_class._print_dependencies()
 
             if not args['y']:
-                install_depencencies = raw_input('\nProceed with dependency installation? [y/n] ')
+                install_depencencies = six.moves.input('\nProceed with dependency installation? [y/n] ')
                 if install_depencencies.lower() in {'no', 'n', 'nope', 'nada', 'nah'}:
                     sys.exit(EXIT_CMD_SUCCESS)
             for package in pipeline_dependencies:
                 pip(['install', '--upgrade', package])
-

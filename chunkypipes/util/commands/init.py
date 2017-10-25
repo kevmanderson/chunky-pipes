@@ -29,9 +29,9 @@ def make_chunky_home(chunky_home_root):
         os.mknod(os.path.join(chunky_root_configs, '__init__.py'), 0o644)
 
         # Write out user messages
-        sys.stdout.write('ChunkyPipes successfully initialized at {}\n'.format(chunky_home_root))
+        sys.stderr.write('ChunkyPipes successfully initialized at {}\n'.format(chunky_home_root))
         if chunky_home_root != os.path.expanduser('~') and not os.environ.get('CHUNKY_HOME'):
-            sys.stdout.write('Please set a CHUNKY_HOME environment variable to {}\n'.format(chunky_home_root))
+            sys.stderr.write('Please set a CHUNKY_HOME environment variable to {}\n'.format(chunky_home_root))
     except OSError as e:
         sys.stderr.write('An error occurred initializing ChunkyPipes at {}.\n{}\n'.format(
             chunky_home_root,

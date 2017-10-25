@@ -30,7 +30,7 @@ class Command(BaseCommand):
         config_dictionary = pipeline_class.configure()
 
         # Start show subcommand output
-        sys.stdout.write('ChunkyPipes pipeline: {}\n\n'.format(pipeline_name))
+        sys.stderr.write('ChunkyPipes pipeline: {}\n\n'.format(pipeline_name))
 
         # Show pipeline arguments
         show_parser = argparse.ArgumentParser(prog='chunky run {}'.format(pipeline_name),
@@ -39,18 +39,18 @@ class Command(BaseCommand):
         show_parser.print_help()
 
         # Show pipeline dependencies
-        sys.stdout.write('\nPipeline Dependencies:\n')
+        sys.stderr.write('\nPipeline Dependencies:\n')
         if pipeline_class.dependencies():
             pipeline_class._print_dependencies()
         else:
-            sys.stdout.write('None\n')
+            sys.stderr.write('None\n')
 
         # Show current platform configuration, if it exists
         config_json_filepath = os.path.join(self.home_configs, '{}.json'.format(pipeline_name))
         if os.path.isfile(config_json_filepath):
-            sys.stdout.write('\nCurrent Configuration:\n')
-            sys.stdout.write(open(config_json_filepath).read())
+            sys.stderr.write('\nCurrent Configuration:\n')
+            sys.stderr.write(open(config_json_filepath).read())
 
         # Show configuration dictionary, with prompts
-        sys.stdout.write('\nConfiguration Dictionary:\n')
-        sys.stdout.write(json.dumps(config_dictionary, indent=4) + '\n')
+        sys.stderr.write('\nConfiguration Dictionary:\n')
+        sys.stderr.write(json.dumps(config_dictionary, indent=4) + '\n')

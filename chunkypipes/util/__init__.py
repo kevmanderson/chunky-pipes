@@ -6,6 +6,8 @@ from importlib import import_module
 
 import pkgutil
 import chunkypipes.util.commands
+from chunkypipes import __version__
+import six
 
 
 def fetch_command_class(subcommand):
@@ -53,12 +55,12 @@ def execute_from_command_line(argv=None):
                               }
 
     # Create subparsers
-    parser = argparse.ArgumentParser(prog='chunky')
+    parser = argparse.ArgumentParser(prog='chunky', version=__version__)
     subparsers = parser.add_subparsers(dest='subcommand',
                                        metavar='[{}]'.format(', '.join(chunky_command_classes.keys())))
 
     # Add a subparser for each subcommand
-    for chunky_command, chunky_command_class in chunky_command_classes.iteritems():
+    for chunky_command, chunky_command_class in six.iteritems(chunky_command_classes):
         subparsers.add_parser(chunky_command.replace('_', '-'), help=chunky_command_class.help_text())
 
     if len(sys.argv) == 1:

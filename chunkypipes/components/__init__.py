@@ -5,6 +5,7 @@ import sys
 import os
 
 from pathos.multiprocessing import ProcessPool
+import six
 
 
 EXIT_ERROR = 1
@@ -294,7 +295,7 @@ class Redirect(object):
         if type(token) == str:
             return Redirect._convert[token]
         elif type(token) == int:
-            reverse_convert = {v: k for k, v in Redirect._convert.iteritems()}
+            reverse_convert = {v: k for k, v in six.iteritems(Redirect._convert)}
             return reverse_convert[token]
         return Redirect.STDOUT
 

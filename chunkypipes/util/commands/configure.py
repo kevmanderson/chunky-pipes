@@ -5,6 +5,8 @@ import json
 import readline
 from chunkypipes.util.commands import BaseCommand
 
+import six.moves
+
 ARGV_PIPELINE_NAME = 0
 ARGV_FIRST_ARGUMENT = 0
 EXIT_CMD_SUCCESS = 0
@@ -26,7 +28,7 @@ class Command(BaseCommand):
             else:
                 if not blank:
                     prompt = config_dict[key].strip().strip(':')
-                    config_dict[key] = (raw_input(prompt + ' [{}]: '.format(current_config.get(key, ''))) or
+                    config_dict[key] = (six.moves.input(prompt + ' [{}]: '.format(current_config.get(key, ''))) or
                                         current_config.get(key, ''))
                 else:
                     config_dict[key] = ''
@@ -65,7 +67,7 @@ class Command(BaseCommand):
 
             # If this config already exists, prompt user before overwrite
             if os.path.isfile(save_location):
-                overwrite = raw_input('Config for {} already exists at {}, overwrite? [y/n] '.format(
+                overwrite = six.moves.input('Config for {} already exists at {}, overwrite? [y/n] '.format(
                     pipeline_name,
                     save_location
                 ))
@@ -100,7 +102,7 @@ class Command(BaseCommand):
                 sys.exit(1)
         else:
             # If pipeline class doesn't exist, exit immediately
-            sys.stdout.write('Pipeline {name} does not exist in {home}\n'.format(
+            sys.stderr.write('Pipeline {name} does not exist in {home}\n'.format(
                 name=pipeline_name,
                 home=self.home_pipelines + '/'
             ))

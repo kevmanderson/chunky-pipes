@@ -1,16 +1,18 @@
 from setuptools import setup, find_packages
 
+import chunkypipes
+
 setup(
     name='ChunkyPipes',
-    version='0.2.5',
+    version=chunkypipes.__version__,
     description='Pipeline design and distribution framework',
     license='MIT',
     author='Dominic Fitzgerald',
     author_email='dominicfitzgerald11@gmail.com',
     url='https://github.com/djf604/chunky-pipes',
-    download_url='https://github.com/djf604/chunky-pipes/tarball/0.2.5',
+    download_url='https://github.com/djf604/chunky-pipes/tarball/{}'.format(chunkypipes.__version__),
     packages=find_packages(),
-    install_requires=['pathos>=0.2.1'],
+    install_requires=['pathos>=0.2.1', 'six'],
     entry_points={
         'console_scripts': ['chunky = chunkypipes.util:execute_from_command_line']
     },

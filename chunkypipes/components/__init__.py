@@ -16,10 +16,10 @@ class ParallelBlock(object):
         'multiprocess': '_run_multiprocess'
     }
 
-    def __init__(self, method='multiprocess', block=True, cores=None, autorun=True):
+    def __init__(self, method='multiprocess', block=True, processes=None, autorun=True):
         self.method = method
         self.should_block = block
-        self.cores = cores
+        self.processes = processes
         self.autorun = bool(autorun)
         self.has_run = False
 
@@ -40,7 +40,7 @@ class ParallelBlock(object):
         self.has_run = True
 
     def _run_multiprocess(self):
-        pool = ProcessPool(nodes=self.cores)
+        pool = ProcessPool(nodes=self.processes)
         sentinel = None
         for software_prep in self.software:
             sentinel = pool.apipe(software_prep.run)

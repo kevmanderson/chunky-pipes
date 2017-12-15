@@ -52,7 +52,6 @@ class ParslPipeline(BasePipeline):
         return all_futures
 
 
-
 class Software(object):
     _id = 0
     _blueprints = list()

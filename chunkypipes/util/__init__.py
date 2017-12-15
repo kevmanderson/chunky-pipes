@@ -55,7 +55,8 @@ def execute_from_command_line(argv=None):
                               }
 
     # Create subparsers
-    parser = argparse.ArgumentParser(prog='chunky', version=__version__)
+    parser = argparse.ArgumentParser(prog='chunky')
+    parser.add_argument('--version', action='version', version=__version__)
     subparsers = parser.add_subparsers(dest='subcommand',
                                        metavar='[{}]'.format(', '.join(chunky_command_classes.keys())))
 

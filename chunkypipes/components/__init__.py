@@ -277,18 +277,15 @@ class Redirect(object):
     }
 
     def __init__(self, stream=STDOUT, dest='out.txt'):
-        if type(stream) == str:
+        if isinstance(stream, six.string_types):
             stream = Redirect.token_convert(str(stream).strip())
 
         self.stream = stream
         self.dest = dest
-        if stream in Redirect._APPEND_MODES:
-            self.mode = 'a'
-        else:
-            self.mode = 'w'
+        self.mode = 'a' if stream in Redirect._APPEND_MODES else 'w'
 
     def __str__(self):
-        return ''.join([Redirect.token_convert(self.stream), self.dest])
+        return ''.join([Redirect.token_convert(self.stream), str(self.dest)])
 
     @staticmethod
     def token_convert(token):

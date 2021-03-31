@@ -329,7 +329,7 @@ class _Settings(object):
                     # If directory to the log doesn't exist, create it
                     logdir = os.path.dirname(self.destination)
                     if logdir and not os.path.exists(logdir):
-                        os.makedirs(logdir, mode=0755)
+                        os.makedirs(logdir, 0755)
 
                     # Open destination filehandle
                     if self._dest_filehandle is not None:
@@ -347,7 +347,7 @@ class _Settings(object):
                     # If directory to the stderr log doesn't exist, create it
                     logdir_stderr = os.path.dirname(self.destination_stderr)
                     if logdir_stderr and not os.path.exists(logdir_stderr):
-                        os.makedirs(logdir_stderr, mode=0755)
+                        os.makedirs(logdir_stderr, 0755)
 
                     # Open destination_stderr filehandle
                     stderr_mode = (self.destination_stderr_mode

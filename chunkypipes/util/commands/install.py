@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
         # Check if pipeline already exists
         if os.path.isfile(os.path.join(self.home_pipelines, os.path.basename(pipeline_path))):
-            overwrite = raw_input('Pipeline {} is already installed, overwrite? [y/n] '.format(
+            overwrite = input('Pipeline {} is already installed, overwrite? [y/n] '.format(
                     os.path.basename(pipeline_path)
             ))
             if overwrite.lower() in {'no', 'n'}:
@@ -62,7 +62,7 @@ class Command(BaseCommand):
         if pipeline_dependencies:
             sys.stdout.write('\nAttempting to install the following dependencies:\n')
             pipeline_class._print_dependencies()
-            install_depencencies = raw_input('\nProceed with dependency installation? [y/n] ')
+            install_depencencies = input('\nProceed with dependency installation? [y/n] ')
             if install_depencencies.lower() in {'no', 'n'}:
                 sys.exit(EXIT_CMD_SUCCESS)
             for package in pipeline_dependencies:

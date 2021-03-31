@@ -26,6 +26,6 @@ class Command(BaseCommand):
 
         for pipeline_name in installed_pipelines:
             if '{}.json'.format(pipeline_name) in installed_configs:
-                print '{} is configured'.format(pipeline_name)
+                print('{} is configured'.format(pipeline_name))
             else:
-                print '{} is NOT configured'.format(pipeline_name)
+                print('{} is NOT configured'.format(pipeline_name))

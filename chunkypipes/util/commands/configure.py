@@ -26,7 +26,7 @@ class Command(BaseCommand):
             else:
                 if not blank:
                     prompt = config_dict[key].strip().strip(':')
-                    config_dict[key] = (raw_input(prompt + ' [{}]: '.format(current_config.get(key, ''))) or
+                    config_dict[key] = (input(prompt + ' [{}]: '.format(current_config.get(key, ''))) or
                                         current_config.get(key, ''))
                 else:
                     config_dict[key] = ''
@@ -65,7 +65,7 @@ class Command(BaseCommand):
 
             # If this config already exists, prompt user before overwrite
             if os.path.isfile(save_location):
-                overwrite = raw_input('Config for {} already exists at {}, overwrite? [y/n] '.format(
+                overwrite = input('Config for {} already exists at {}, overwrite? [y/n] '.format(
                     pipeline_name,
                     save_location
                 ))

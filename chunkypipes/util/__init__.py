@@ -58,7 +58,7 @@ def execute_from_command_line(argv=None):
                                        metavar='[{}]'.format(', '.join(chunky_command_classes.keys())))
 
     # Add a subparser for each subcommand
-    for chunky_command, chunky_command_class in chunky_command_classes.iteritems():
+    for chunky_command, chunky_command_class in chunky_command_classes.items():
         subparsers.add_parser(chunky_command, help=chunky_command_class.help_text())
 
     if len(sys.argv) == 1:

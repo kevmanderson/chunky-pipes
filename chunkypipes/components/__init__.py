@@ -250,7 +250,7 @@ class Redirect(object):
         if type(token) == str:
             return Redirect._convert[token]
         elif type(token) == int:
-            reverse_convert = {v: k for k, v in Redirect._convert.iteritems()}
+            reverse_convert = {v: k for k, v in Redirect._convert.items()}
             return reverse_convert[token]
         return Redirect.STDOUT
 

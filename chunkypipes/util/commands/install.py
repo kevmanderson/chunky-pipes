@@ -32,12 +32,12 @@ class Command(BaseCommand):
             sys.exit(EXIT_CMD_SYNTAX_ERROR)
 
         # Check if pipeline already exists
-        if os.path.isfile(os.path.join(self.home_pipelines, os.path.basename(pipeline_path))):
-            overwrite = input('Pipeline {} is already installed, overwrite? [y/n] '.format(
-                    os.path.basename(pipeline_path)
-            ))
-            if overwrite.lower() in {'no', 'n'}:
-                sys.exit(EXIT_CMD_SUCCESS)
+        #if os.path.isfile(os.path.join(self.home_pipelines, os.path.basename(pipeline_path))):
+        #    overwrite = input('Pipeline {} is already installed, overwrite? [y/n] '.format(
+        #            os.path.basename(pipeline_path)
+        #    ))
+        #    if overwrite.lower() in {'no', 'n'}:
+        #        sys.exit(EXIT_CMD_SUCCESS)
 
         # Copy pipeline file
         try:

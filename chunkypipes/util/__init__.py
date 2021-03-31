@@ -74,5 +74,4 @@ def execute_from_command_line(argv=None):
             chunky_command_classes[subcommand].run(argv[2:])
         except Exception as e:
             sys.stderr.write('ChunkyPipes encountered an error when trying to execute {}:\n'.format(subcommand))
-            sys.stderr.write(e)
             traceback.print_exc()
